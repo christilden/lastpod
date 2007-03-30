@@ -2,6 +2,7 @@ package ws.afterglo.audioPod;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -14,7 +15,7 @@ import javax.swing.JOptionPane;
  */
 public class AudioPod {
     public static UI		UI;
-    public static ArrayList	recentplayed; //parsed using DbReader class
+    public static List	recentplayed; //parsed using DbReader class
     public static Scrobbler	scrobbler;
     
     public static Logger    logger;
@@ -72,9 +73,10 @@ public class AudioPod {
         
         try {
             AudioPod.scrobbler = new Scrobbler(username, password);
-            AudioPod.scrobbler.handshake();
-            AudioPod.scrobbler.submittracks();
-            AudioPod.recentplayed = new ArrayList(); //clear recent track list
+            List activeRecentPlayed = onlyActiveTrackItems(recentplayed);
+            AudioPod.scrobbler.handshake(activeRecentPlayed);
+            AudioPod.scrobbler.submittracks(activeRecentPlayed);
+            AudioPod.recentplayed = onlyInactiveTrackItems(recentplayed); //clear recent track list
             AudioPod.UI.newTrackListAvailable();
         } catch (Exception e) {
             StackTraceElement[] trace = e.getStackTrace();
@@ -87,7 +89,30 @@ public class AudioPod {
             JOptionPane.showMessageDialog(null, e.getMessage(),"Error!", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
+    public static List onlyActiveTrackItems(List recentPlayed) {
+        return filterTrackItems(recentPlayed, true);
+    }
+
+    public static List onlyInactiveTrackItems(List recentPlayed) {
+        return filterTrackItems(recentPlayed, false);
+    }
+
+    public static List filterTrackItems(List recentPlayed, boolean active) {
+        List filteredRecentPlayed = new ArrayList(); 
+        
+        for(int i = 0; i < recentPlayed.size(); i++ ) {
+            TrackItem trackItem = (TrackItem) recentPlayed.get(i);
+            if(trackItem.isActive()&&active) {
+                filteredRecentPlayed.add(trackItem);
+            } else if(!trackItem.isActive() && !active) {
+                filteredRecentPlayed.add(trackItem);
+            }
+        }
+        
+        return filteredRecentPlayed;
+    }
+
     public static void main(String args[]) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {

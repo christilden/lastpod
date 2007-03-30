@@ -13,6 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,10 +42,10 @@ public class Scrobbler {
         this.logger = Logger.getLogger(this.getClass().getPackage().getName());
     }
     
-    public void handshake() throws UnsupportedEncodingException, MalformedURLException,
+    public void handshake(List recentplayed) throws UnsupportedEncodingException, MalformedURLException,
                                    IOException, FailedLoginException
     {
-        if(AudioPod.recentplayed.size() == 0) {
+        if(recentplayed.size() == 0) {
             throw new RuntimeException("No tracks to submit");
         }
         
@@ -114,11 +115,11 @@ public class Scrobbler {
         this.logger.log(Level.INFO, "Handshake completed");
     }
     
-    public void submittracks() throws UnsupportedEncodingException, NoSuchAlgorithmException,
+    public void submittracks(List recentplayed) throws UnsupportedEncodingException, NoSuchAlgorithmException,
                                       MalformedURLException, IOException, FailedLoginException
     {
         this.logger.log(Level.INFO, "Submitting tracks...");
-        if(AudioPod.recentplayed.size() == 0) {
+        if(recentplayed.size() == 0) {
             throw new RuntimeException("No tracks to submit");
         }
         
@@ -130,8 +131,8 @@ public class Scrobbler {
                              "s=" + URLEncoder.encode(md5chal) + "&";
         
         int tracknum = 0;
-        for(int i = 0; i < AudioPod.recentplayed.size(); i++) {
-            TrackItem track = (TrackItem)AudioPod.recentplayed.get(i);
+        for(int i = 0; i < recentplayed.size(); i++) {
+            TrackItem track = (TrackItem)recentplayed.get(i);
             
             if(track.getLength() < 30) {
                 continue;

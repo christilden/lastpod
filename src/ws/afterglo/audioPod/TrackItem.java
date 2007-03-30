@@ -8,6 +8,7 @@ import java.util.Date;
  */
 public class TrackItem implements Comparable {
     private long	trackid;
+    private Boolean active;
     private long	length; //in seconds
     private String	artist;
     private String	album;
@@ -20,6 +21,7 @@ public class TrackItem implements Comparable {
      */
     public TrackItem() {
         this.trackid = 0;
+        this.active = new Boolean(true);
         this.length = 0;
         this.artist = "";
         this.album = "";
@@ -28,6 +30,24 @@ public class TrackItem implements Comparable {
         this.lastplayed = 0;
     }
     
+    /**
+     * If <code>true</code>; sets this track to be submitted, otherwise do not
+     * submit. 
+     * @return Returns <code>true</code> if this track should be submitted.
+     */
+    public Boolean isActive() {
+        return active;
+    }
+
+    /**
+     * If <code>true</code>; sets this track to be submitted, otherwise do not
+     * submit. 
+     * @param active  <code>true</code> if this track should be submitted.
+     */
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
     /**
      * @return Returns the album.
      */
