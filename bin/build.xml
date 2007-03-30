@@ -1,4 +1,4 @@
-<project name="itbill" default="compile" basedir=".">
+<project name="lastpod" default="compile" basedir=".">
 
   <property environment="env"/>
   <property name="classpath"      value="${env.CLASSPATH}"/>
@@ -104,7 +104,7 @@
       <classpath refid="project.classpath"/>
     </javac>
 
-    <copy file="${src.home}/ws/afterglo/audioPod/COPYING" todir="${bin.home}/ws/afterglo/audioPod"/>
+    <copy file="${src.home}/org/lastpod/COPYING" todir="${bin.home}/org/lastpod"/>
   </target>
 
   <target name="test" depends="prepare,compile"
@@ -137,7 +137,7 @@
     <jar destfile="${dist.home}/${app.name}.jar" basedir="${bin.home}">
         <manifest>
             <attribute name="Built-By" value="Chris Tilden"/>
-            <attribute name="Main-Class" value="ws.afterglo.audioPod.AudioPod"/>
+            <attribute name="Main-Class" value="org.lastpod.LastPod"/>
             <attribute name="Implementation-Version" value="${app.version} ${TODAY}"/>
         </manifest>
     </jar>

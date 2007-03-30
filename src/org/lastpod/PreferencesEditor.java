@@ -56,7 +56,7 @@ public class PreferencesEditor {
         this.frame.getContentPane().setLayout(this.layout);
 
         this.addElements();
-        this.matchPreferences(); //gets preferences from AudioPod and updates UI
+        this.matchPreferences(); //gets preferences from LastPod and updates UI
 
         this.frame.pack();
         this.frame.setVisible(true);

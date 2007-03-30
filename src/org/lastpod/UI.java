@@ -43,7 +43,7 @@ public class UI {
 
     public void buildUI() {
         JFrame.setDefaultLookAndFeelDecorated(true);
-        frame = new JFrame("AudioPod");
+        frame = new JFrame("LastPod");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
