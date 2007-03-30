@@ -102,15 +102,15 @@ public class UI {
         frame.setVisible(true);
     }
     
+    public void repaint() {
+        frame.repaint();
+    }
+    
     public void newTrackListAvailable() {
         this.recentpanel.newTrackListAvailable();
     }
     
     public JTextArea getLogtextarea() {
         return this.logtextarea;
-    }
-    
-    public void repaint() {
-        frame.repaint();
     }
 }
