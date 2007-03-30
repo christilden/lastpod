@@ -139,6 +139,16 @@
     </jar>
   </target>
 
+  <target name="debug" depends="dist"
+      description="Runs the dist jar file with debugging enabled.">
+    <java jar="${dist.home}/${app.name}.jar" fork="true">
+      <jvmarg value="-Xdebug"/>
+      <jvmarg value="-Xnoagent"/>
+      <jvmarg value="-Djava.compiler=NONE"/>
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9000"/>
+    </java>
+  </target>
+
   <!-- clean up the deploy.home directory -->
   <target name="clean"
       description="Cleans all compiled code and WAR files.">
