@@ -27,13 +27,14 @@ public class UI {
         frame = new JFrame("AudioPod");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        int x=(int)(screenSize.width/2-frame.getWidth()/2);
+        int y=(int)(screenSize.height/2-frame.getHeight()/2);
+        frame.setLocation(x,y);
+
         screenSize.width *= 0.90;
         screenSize.height *= 0.85;
         frame.setSize(screenSize);
-
-        int x=(int)(Toolkit.getDefaultToolkit().getScreenSize().width/2-frame.getWidth()/2);
-        int y=(int)(Toolkit.getDefaultToolkit().getScreenSize().height/2-frame.getHeight()/2);
-        frame.setLocation(x,y);
 
         GridBagLayout layout = new GridBagLayout();
         frame.getContentPane().setLayout(layout);
