@@ -35,8 +35,8 @@ public class UI {
         frame.setSize(frameSize);
 
         /* Centers the interface on the screen. */
-        int x = (int) ((screenSize.width / 2) - (frame.getWidth() / 2));
-        int y = (int) ((screenSize.height / 2) - (frame.getHeight() / 2));
+        int x = (screenSize.width / 2) - (frame.getWidth() / 2);
+        int y = (screenSize.height / 2) - (frame.getHeight() / 2);
         frame.setLocation(x, y);
 
         GridBagLayout layout = new GridBagLayout();
@@ -83,14 +83,14 @@ public class UI {
         button.setMnemonic(KeyEvent.VK_A);
         button.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
-                    JButton button = (JButton) ev.getSource();
+                    JButton selectionButton = (JButton) ev.getSource();
 
-                    if ("Unselect All".equals(button.getText())) {
+                    if ("Unselect All".equals(selectionButton.getText())) {
                         AudioPod.unselectAll();
-                        button.setText("Select All");
-                    } else if ("Select All".equals(button.getText())) {
+                        selectionButton.setText("Select All");
+                    } else if ("Select All".equals(selectionButton.getText())) {
                         AudioPod.selectAll();
-                        button.setText("Unselect All");
+                        selectionButton.setText("Unselect All");
                     }
 
                     frame.repaint();

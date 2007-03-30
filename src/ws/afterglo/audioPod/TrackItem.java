@@ -146,8 +146,8 @@ public class TrackItem implements Comparable {
         this.trackid = trackid;
     }
 
-    public int compareTo(Object track) {
-        TrackItem temptrack = (TrackItem) track;
+    public int compareTo(Object trackItem) {
+        TrackItem temptrack = (TrackItem) trackItem;
 
         if (this.lastplayed < temptrack.getLastplayed()) {
             return -1;
