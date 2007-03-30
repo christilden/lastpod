@@ -116,13 +116,19 @@ public class PreferencesEditor {
 
     private void matchPreferences() {
         this.userfield.setText(fPrefs.get("Username", "<Username>"));
-        this.passfield.setText(fPrefs.get("Password", ""));
         this.dbfield.setText(fPrefs.get("iTunes Path", "<iPod iTunes Database Location>"));
     }
 
     private void savePreferences() {
         fPrefs.put("Username", this.userfield.getText());
-        fPrefs.put("Password", new String(this.passfield.getPassword()));
+
+        String password = new String(passfield.getPassword());
+
+        if (password.length() != 0) {
+            String encryptedPassword = MiscUtilities.md5DigestPassword(password);
+            fPrefs.put("encryptedPassword", encryptedPassword);
+        }
+
         fPrefs.put("iTunes Path", this.dbfield.getText());
 
         try {

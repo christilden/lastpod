@@ -41,6 +41,14 @@ public class UI {
     private JTextArea logtextarea;
     private JFrame frame;
 
+    /**
+     * Gets the user interface's JFrame.
+     * @return  The user interface's JFrame.
+     */
+    public JFrame getFrame() {
+        return frame;
+    }
+
     public void buildUI() {
         JFrame.setDefaultLookAndFeelDecorated(true);
         frame = new JFrame("LastPod");

@@ -51,16 +51,16 @@ import javax.security.auth.login.FailedLoginException;
  */
 public class Scrobbler {
     private String username;
-    private String password;
+    private String encryptedPassword;
     private String challenge;
     private String submithost;
     private Integer submitport;
     private String submiturl;
     private Logger logger;
 
-    public Scrobbler(String username, String password) {
+    public Scrobbler(String username, String encryptedPassword) {
         this.username = username;
-        this.password = password;
+        this.encryptedPassword = encryptedPassword;
         this.logger = Logger.getLogger(this.getClass().getPackage().getName());
     }
 
@@ -151,9 +151,8 @@ public class Scrobbler {
         }
 
         MessageDigest md = MessageDigest.getInstance("MD5");
-        String md5pass =
-            MiscUtilities.hexencode(md.digest(this.password.getBytes())) + this.challenge;
-        String md5chal = MiscUtilities.hexencode(md.digest(md5pass.getBytes()));
+        String md5pass = encryptedPassword + this.challenge;
+        String md5chal = MiscUtilities.hexEncode(md.digest(md5pass.getBytes()));
 
         String querystring =
             "u=" + URLEncoder.encode(this.username) + "&" + "s=" + URLEncoder.encode(md5chal) + "&";

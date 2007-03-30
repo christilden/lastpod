@@ -91,15 +91,32 @@ public class LastPod {
         Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
         String username = fPrefs.get("Username", "default");
         String password = fPrefs.get("Password", "default");
+        String encryptedPassword = fPrefs.get("encryptedPassword", "default");
 
-        if (username.equals("default") && password.equals("default")) {
+        if (!password.equals("default")) {
+            encryptedPassword = MiscUtilities.md5DigestPassword(password);
+            fPrefs.put("encryptedPassword", encryptedPassword);
+            fPrefs.remove("Password");
+
+            String message =
+                "Your password was stored unencrypted on your system."
+                + " This version of LastPod has encrypted this password for future usage.";
+            JOptionPane.showMessageDialog(UI.getFrame(), message);
+
+            logger = Logger.getLogger(LastPod.class.getPackage().getName());
+            logger.log(Level.WARNING, message);
+        }
+
+        String encryptedDefault = MiscUtilities.md5DigestPassword("default");
+
+        if (username.equals("default") && encryptedPassword.equals(encryptedDefault)) {
             logger.log(Level.INFO, LastPod.NoPrefsError);
 
             return;
         }
 
         try {
-            LastPod.scrobbler = new Scrobbler(username, password);
+            LastPod.scrobbler = new Scrobbler(username, encryptedPassword);
 
             List activeRecentPlayed = onlyActiveTrackItems(recentplayed);
             LastPod.scrobbler.handshake(activeRecentPlayed);

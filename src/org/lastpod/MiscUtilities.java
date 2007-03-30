@@ -19,6 +19,8 @@
  */
 package org.lastpod;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Miscellaneous utilities used by LastPod.
@@ -38,7 +40,7 @@ public class MiscUtilities {
      * @param array  The byte array to encode.
      * @return  A heidecimal String representing the byte array.
      */
-    public static String hexencode(byte[] array) {
+    public static String hexEncode(byte[] array) {
         StringBuffer sb = new StringBuffer();
 
         for (int i = 0; i < array.length; ++i) {
@@ -46,5 +48,20 @@ public class MiscUtilities {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Creates a MD5 digest String from a given password.
+     * @param password  The password to digest.
+     * @return  The MD5 digested password.
+     */
+    public static String md5DigestPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            return hexEncode(md.digest(password.getBytes()));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("No MD5 algorithm present on the system");
+        }
     }
 }
