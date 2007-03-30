@@ -85,7 +85,7 @@ public class Scrobbler {
 
         this.logger.log(Level.FINE, "Received from server:\n" + content);
 
-        if (content.length() == 0) {
+        if ((content == null) || (content.length() == 0)) {
             throw new RuntimeException("Invalid response received from AudioScrobbler");
         }
 
@@ -208,7 +208,7 @@ public class Scrobbler {
 
         this.logger.log(Level.FINE, "Received from server:\n" + content);
 
-        if (content.length() == 0) {
+        if ((content == null) || (content.length() == 0)) {
             throw new RuntimeException("Invalid response received from AudioScrobbler");
         }
 
