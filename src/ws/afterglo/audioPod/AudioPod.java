@@ -129,7 +129,6 @@ public class AudioPod {
             TrackItem trackItem = (TrackItem) recentplayed.get(i);
             trackItem.setActive(new Boolean(select));
         }
-        UI.repaint();
     }
 
     public static void main(String args[]) {

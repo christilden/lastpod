@@ -83,7 +83,8 @@ public class UI {
                     AudioPod.selectAll();
                     button.setText("Unselect All");
                 }
-                
+
+                frame.repaint();
             }
         });
         layout.setConstraints(button, c);
@@ -100,10 +101,6 @@ public class UI {
         frame.getContentPane().add(button);
         
         frame.setVisible(true);
-    }
-    
-    public void repaint() {
-        frame.repaint();
     }
     
     public void newTrackListAvailable() {
