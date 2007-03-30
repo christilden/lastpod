@@ -23,7 +23,7 @@ public class RecentPanel extends JPanel {
         this.model = new RecentModel();
         this.table = new JTable(this.model);
         this.table.getColumnModel().getColumn(0).setMaxWidth(30);
-        this.table.getColumnModel().getColumn(1).setMaxWidth(30);
+        this.table.getColumnModel().getColumn(1).setMaxWidth(60);
         this.table.getColumnModel().getColumn(5).setMaxWidth(60);
         this.table.getColumnModel().getColumn(1).setCellRenderer(table.getDefaultRenderer(Boolean.class));
         this.table.getColumnModel().getColumn(1).setCellEditor(table.getDefaultEditor(Boolean.class));
