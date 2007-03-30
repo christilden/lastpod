@@ -131,10 +131,14 @@
   <!-- create a jar file for deployment. -->
   <target name="dist" depends="prepare,compile"
       description="Creates a JAR file containing the application.">
+    <tstamp>
+        <format property="TODAY" pattern="MM/dd/yyyy"/>
+    </tstamp>
     <jar destfile="${dist.home}/${app.name}.jar" basedir="${bin.home}">
         <manifest>
             <attribute name="Built-By" value="Chris Tilden"/>
             <attribute name="Main-Class" value="ws.afterglo.audioPod.AudioPod"/>
+            <attribute name="Implementation-Version" value="${app.version} ${TODAY}"/>
         </manifest>
     </jar>
   </target>
