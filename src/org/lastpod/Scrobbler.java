@@ -151,8 +151,9 @@ public class Scrobbler {
         }
 
         MessageDigest md = MessageDigest.getInstance("MD5");
-        String md5pass = this.hexencode(md.digest(this.password.getBytes())) + this.challenge;
-        String md5chal = this.hexencode(md.digest(md5pass.getBytes()));
+        String md5pass =
+            MiscUtilities.hexencode(md.digest(this.password.getBytes())) + this.challenge;
+        String md5chal = MiscUtilities.hexencode(md.digest(md5pass.getBytes()));
 
         String querystring =
             "u=" + URLEncoder.encode(this.username) + "&" + "s=" + URLEncoder.encode(md5chal) + "&";
@@ -249,15 +250,5 @@ public class Scrobbler {
         this.logger.log(Level.INFO,
             "You must now sync your iPod with your music management software "
             + "or delete 'Play Counts' from the iTunes folder!");
-    }
-
-    private String hexencode(byte[] array) {
-        StringBuffer sb = new StringBuffer();
-
-        for (int i = 0; i < array.length; ++i) {
-            sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
-        }
-
-        return sb.toString();
     }
 }
