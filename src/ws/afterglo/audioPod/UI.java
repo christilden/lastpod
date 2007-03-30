@@ -20,10 +20,11 @@ import javax.swing.JTextArea;
 public class UI {
     private RecentPanel	recentpanel;
     private JTextArea	logtextarea;
+    private JFrame frame;
     
     public void buildUI() {
         JFrame.setDefaultLookAndFeelDecorated(true);
-        JFrame frame = new JFrame("AudioPod");
+        frame = new JFrame("AudioPod");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         screenSize.width *= 0.90;
@@ -70,6 +71,24 @@ public class UI {
         layout.setConstraints(button, c);
         frame.getContentPane().add(button);
         
+        button = new JButton("Unselect All");
+        button.setMnemonic(KeyEvent.VK_A);
+        button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                JButton button = (JButton) ev.getSource();
+                if ("Unselect All".equals(button.getText())) {
+                    AudioPod.unselectAll();
+                    button.setText("Select All");
+                } else if ("Select All".equals(button.getText())) {
+                    AudioPod.selectAll();
+                    button.setText("Unselect All");
+                }
+                
+            }
+        });
+        layout.setConstraints(button, c);
+        frame.getContentPane().add(button);
+        
         button = new JButton("Submit Tracks");
         button.setMnemonic(KeyEvent.VK_S);
         button.addActionListener(new ActionListener() {
@@ -89,5 +108,9 @@ public class UI {
     
     public JTextArea getLogtextarea() {
         return this.logtextarea;
+    }
+    
+    public void repaint() {
+        frame.repaint();
     }
 }

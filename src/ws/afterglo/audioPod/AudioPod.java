@@ -90,15 +90,15 @@ public class AudioPod {
         }
     }
 
-    public static List onlyActiveTrackItems(List recentPlayed) {
+    private static List onlyActiveTrackItems(List recentPlayed) {
         return filterTrackItems(recentPlayed, true);
     }
 
-    public static List onlyInactiveTrackItems(List recentPlayed) {
+    private static List onlyInactiveTrackItems(List recentPlayed) {
         return filterTrackItems(recentPlayed, false);
     }
 
-    public static List filterTrackItems(List recentPlayed, boolean filterActive) {
+    private static List filterTrackItems(List recentPlayed, boolean filterActive) {
         List filteredRecentPlayed = new ArrayList(); 
         
         for(int i = 0; i < recentPlayed.size(); i++ ) {
@@ -114,6 +114,22 @@ public class AudioPod {
         }
         
         return filteredRecentPlayed;
+    }
+
+    public static void selectAll() {
+        setupSelections(true);
+    }
+
+    public static void unselectAll() {
+        setupSelections(false);
+    }
+
+    private static void setupSelections(boolean select) {
+        for(int i = 0; i < recentplayed.size(); i++ ) {
+            TrackItem trackItem = (TrackItem) recentplayed.get(i);
+            trackItem.setActive(new Boolean(select));
+        }
+        UI.repaint();
     }
 
     public static void main(String args[]) {
