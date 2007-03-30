@@ -99,7 +99,9 @@ public class UI {
         });
         layout.setConstraints(button, c);
         frame.getContentPane().add(button);
-        
+    }
+    
+    public void makeVisable() {
         frame.setVisible(true);
     }
     

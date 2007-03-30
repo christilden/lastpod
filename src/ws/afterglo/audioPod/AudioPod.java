@@ -34,6 +34,8 @@ public class AudioPod {
         logger.addHandler(new LogHandler());
         
         AudioPod.ParsePlayCounts();
+
+        AudioPod.UI.makeVisable();
     }
     
     public static void ParsePlayCounts() {
