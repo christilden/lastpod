@@ -1,0 +1,89 @@
+package ws.afterglo.audioPod;
+
+import java.awt.GridLayout;
+import java.text.DateFormat;
+import java.util.Date;
+
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.AbstractTableModel;
+
+/**
+ * @author muti
+ *
+ */
+public class RecentPanel extends JPanel {
+    private JTable		table;
+    private RecentModel	model;
+    
+    public RecentPanel() {
+        super(new GridLayout(1,1));
+        
+        this.model = new RecentModel();
+        this.table = new JTable(this.model);
+        this.table.getColumnModel().getColumn(0).setMaxWidth(30);
+        this.table.getColumnModel().getColumn(4).setMaxWidth(60);
+        JScrollPane scrollpane = new JScrollPane(this.table);
+        
+        add(scrollpane);
+    }
+    
+    public void newTrackListAvailable() {
+        this.model.fireTableDataChanged();
+    }
+    
+    private class RecentModel extends AbstractTableModel {
+        private String[] columnData = new String[] {
+                "#", "Artist", "Album", "Track", "Length", "Play Time"
+        };
+        
+        public int getColumnCount() {
+            return this.columnData.length;
+        }
+        
+        public int getRowCount() {
+            if(AudioPod.recentplayed != null) {
+                return AudioPod.recentplayed.size();
+            } else {
+                return 0;
+            }
+        }
+        
+        public String getColumnName(int col) {
+            return this.columnData[col];
+        }
+        
+        public Object getValueAt(int row, int col) {
+            TrackItem track;
+            
+            if(AudioPod.recentplayed != null) {
+                track = (TrackItem)AudioPod.recentplayed.get(row);
+            } else {
+                return new Object();
+            }
+            
+            switch(col) {
+                case 0: return new Integer(row+1);
+                case 1: return track.getArtist();
+                case 2: return track.getAlbum();
+                case 3: return track.getTrack();
+                case 4: return this.convertMS(track.getLength());
+                case 5:
+                    Date date = new Date(track.getLastplayed() * 1000);
+                    return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(date);
+            }
+            return new Object(); //if not found, return empty object
+        }
+        
+        private String convertMS(long length) {
+            long minutes = length / 60;
+            String seconds = new Long(length - (minutes * 60)).toString();
+            
+            if(seconds.length() == 1) {
+                seconds = "0" + seconds;
+            }
+            return minutes + ":" + seconds;
+        }
+    }
+}
