@@ -78,7 +78,7 @@ public class LastPod {
             StackTraceElement[] trace = e.getStackTrace();
 
             for (int i = 0; i < trace.length; i++) {
-                if (trace[i].getClassName().startsWith("ws.afterglo.audioPod")) {
+                if (trace[i].getClassName().startsWith("org.lastpod")) {
                     logger.log(Level.SEVERE, trace[i].toString());
                 }
             }
@@ -110,7 +110,7 @@ public class LastPod {
             StackTraceElement[] trace = e.getStackTrace();
 
             for (int i = 0; i < trace.length; i++) {
-                if (trace[i].getClassName().startsWith("ws.afterglo.audioPod")) {
+                if (trace[i].getClassName().startsWith("org.lastpod")) {
                     logger.log(Level.SEVERE, trace[i].toString());
                 }
             }
