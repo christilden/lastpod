@@ -51,9 +51,9 @@ public class RecentPanel extends JPanel {
         public int getRowCount() {
             if (AudioPod.recentplayed != null) {
                 return AudioPod.recentplayed.size();
-            } else {
-                return 0;
             }
+
+            return 0;
         }
 
         public String getColumnName(int col) {
