@@ -1,0 +1,148 @@
+<project name="itbill" default="compile" basedir=".">
+
+  <property environment="env"/>
+  <property name="classpath"      value="${env.CLASSPATH}"/>
+  <property name="java.home"      value="${env.JAVA_HOME}"/>
+  <property name="lib.home"       value="${env.LIB_HOME}"/>
+
+  <!-- load all the properties which should be changed for each project. -->
+  <property file="build.properties"/>
+
+  <!-- these should mostly stay the same -->
+  <property name="bin.home"       value="../classes"/>
+  <property name="etc.home"       value="../etc"/>
+  <property name="src.home"       value="../src"/>
+  <property name="dist.home"      value="../dist"/>
+
+  <!-- We do not want to copy source control files when we build -->
+  <patternset id="source.control.files">
+    <exclude name="**/.svn"/>
+  </patternset>
+
+  <!-- Library file to be used only within the ANT build process. -->
+  <patternset id="build.libs">
+    <patternset refid="source.control.files"/>
+    <include name="jalopy-1.5rc3.jar"/>
+    <include name="jalopy-ant-0.1-1.5rc3.jar"/>
+    <include name="antlr-2.7.5.jar"/>
+    <include name="log4j-1.2.9.jar"/>
+    <include name="catalina-ant-5.0.28.jar"/>
+  </patternset>
+
+  <!-- Setup the CLASSPATH for this project. -->
+  <path id="project.classpath">
+    <pathelement path="${classpath}"/>
+    <pathelement location="${bin.home}" />
+  	<fileset dir="${lib.home}">
+  	  <patternset refid="build.libs"/>
+  	</fileset>
+  </path>
+
+  <!-- Setup Jalopy (Code Formatter) -->
+  <taskdef name="jalopy"
+               classname="de.hunsicker.jalopy.plugin.ant.AntPlugin" classpathref="project.classpath"/>
+
+  <!-- Setup Checkstyle -->
+  <taskdef name="checkstyle"
+               classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" classpath="${lib.home}/checkstyle-all-4.3.jar"/>
+
+  <!-- apply code formatting to all classes -->
+  <target name="code-format"
+      description="Formats the source code to the code format recommended by Sun.">
+    <!--
+      Invokes Jalopy as follows:
+
+      - All formatted files will have unix fileformat (\n)
+      - Load your code convention from the given url
+      - Override the convention to use the file history feature
+      - Override the convention to use alder32 checksums of files for history testing
+      - Override the convention to use loglevel "info"
+      - Override the convention to use 1 threads
+      - The import optimization feature will work (if enabled in the active
+        convention), because a classpath reference is specified
+
+        Don't forget to setup an include pattern as Jalopy truly expects
+        valid Java source files as input!
+    -->
+    <jalopy fileformat="auto"
+            convention="jalopy-codeformat-standard.xml"
+            history="file"
+            historymethod="adler32"
+            loglevel="info"
+            threads="1"
+            classpathref="project.classpath">
+      <fileset dir="${src.home}">
+        <include name="**/*.java" />
+      </fileset>
+    </jalopy>
+  </target>
+
+  <!-- check to make sure the code meets the project's coding style -->
+  <target name="check-style"
+      description="Checks to make sure the source code follows the style patterns recommended by Sun. (JavaDoc, spacing, etc)">
+    <checkstyle config="sun_checks.xml">
+      <classpath refid="project.classpath"/>
+      <fileset dir="${src.home}" includes="**/*.java"/>
+    </checkstyle>
+  </target>
+
+  <!-- get the deploy.home directory ready for a build -->
+  <target name="prepare"
+      description="Creates all the directories and copies all files which are required in order build the application.">
+
+      <mkdir dir="${bin.home}"/>
+      <mkdir dir="${dist.home}"/>
+  </target>
+
+  <!-- compile all java classes from the src/java directory, outputting in
+       the bin.home -->
+  <target name="compile" depends="prepare"
+      description="Compiles all the source code for the application into your development directory.">
+    <mkdir dir="${bin.home}"/>
+    <javac srcdir="${src.home}" destdir="${bin.home}" debug="on" optimize="on"
+           target="1.6" source="1.6" deprecation="off" compiler="modern">
+      <classpath refid="project.classpath"/>
+    </javac>
+
+    <copy file="${src.home}/ws/afterglo/audioPod/COPYING" todir="${bin.home}/ws/afterglo/audioPod"/>
+  </target>
+
+  <target name="test" depends="prepare,compile"
+      description="Unit tests the application using JUnit.  Runs all classes with that meet the pattern *Test*.">
+      
+    <junit printsummary="no" haltonfailure="yes" forkmode="perBatch">
+      <classpath refid="project.classpath"/>
+      <assertions><enable/></assertions>
+      <jvmarg value="-Xdebug"/>
+      <jvmarg value="-Xnoagent"/>
+      <jvmarg value="-Djava.compiler=NONE"/>
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9000"/>
+
+      <formatter type="brief" usefile="false" />
+      <batchtest fork="yes">
+        <fileset dir="${src.home}">
+          <include name="**/*Test.java"/>
+          <exclude name="**/AllTests.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <!-- create a jar file for deployment. -->
+  <target name="dist" depends="prepare,compile"
+      description="Creates a JAR file containing the application.">
+    <jar destfile="${dist.home}/${app.name}.jar" basedir="${bin.home}">
+        <manifest>
+            <attribute name="Built-By" value="Chris Tilden"/>
+            <attribute name="Main-Class" value="ws.afterglo.audioPod.AudioPod"/>
+        </manifest>
+    </jar>
+  </target>
+
+  <!-- clean up the deploy.home directory -->
+  <target name="clean"
+      description="Cleans all compiled code and WAR files.">
+    <delete dir="${bin.home}"/>
+    <delete dir="${dist.home}"/>
+  </target>
+</project>
