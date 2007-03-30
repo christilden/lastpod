@@ -11,7 +11,7 @@
   <!-- these should mostly stay the same -->
   <property name="bin.home"       value="../classes"/>
   <property name="etc.home"       value="../etc"/>
-  <property name="src.home"       value="../../audiopod+/src"/>
+  <property name="src.home"       value="../src"/>
   <property name="dist.home"      value="../dist"/>
 
   <!-- We do not want to copy source control files when we build -->
