@@ -98,14 +98,17 @@ public class AudioPod {
         return filterTrackItems(recentPlayed, false);
     }
 
-    public static List filterTrackItems(List recentPlayed, boolean active) {
+    public static List filterTrackItems(List recentPlayed, boolean filterActive) {
         List filteredRecentPlayed = new ArrayList(); 
         
         for(int i = 0; i < recentPlayed.size(); i++ ) {
             TrackItem trackItem = (TrackItem) recentPlayed.get(i);
-            if(trackItem.isActive()&&active) {
+            
+            boolean trackActive = trackItem.isActive().booleanValue();
+
+            if (trackActive && filterActive) {
                 filteredRecentPlayed.add(trackItem);
-            } else if(!trackItem.isActive() && !active) {
+            } else if(!trackActive && !filterActive) {
                 filteredRecentPlayed.add(trackItem);
             }
         }
