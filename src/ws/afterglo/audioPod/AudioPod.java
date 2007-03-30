@@ -16,15 +16,15 @@ import javax.swing.JOptionPane;
 public class AudioPod {
     public static UI		UI;
     public static List	recentplayed; //parsed using DbReader class
-    public static Scrobbler	scrobbler;
+    private static Scrobbler	scrobbler;
     
-    public static Logger    logger;
-    public static String    NoPrefsError = "You have not setup your preferences.\n" +
+    private static Logger    logger;
+    private static String    NoPrefsError = "You have not setup your preferences.\n" +
                                            "Please click Preferences below to configure the location of " +
                                            "your iTunesDB (it's on your iPod's drive) and your AudioScrobbler " +
                                            "username and password.";
     
-    public static void Load() {
+    private static void Load() {
         AudioPod.recentplayed = new ArrayList();
         AudioPod.UI = new UI();
         AudioPod.UI.buildUI();
