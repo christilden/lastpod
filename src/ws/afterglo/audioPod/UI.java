@@ -30,7 +30,11 @@ public class UI {
         screenSize.width *= 0.90;
         screenSize.height *= 0.85;
         frame.setSize(screenSize);
-        
+
+        int x=(int)(Toolkit.getDefaultToolkit().getScreenSize().width/2-frame.getWidth()/2);
+        int y=(int)(Toolkit.getDefaultToolkit().getScreenSize().height/2-frame.getHeight()/2);
+        frame.setLocation(x,y);
+
         GridBagLayout layout = new GridBagLayout();
         frame.getContentPane().setLayout(layout);
         
