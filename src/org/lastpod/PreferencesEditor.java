@@ -113,7 +113,7 @@ public class PreferencesEditor {
             logger.log(Level.WARNING, "Unable to save preferences: " + e.toString());
         }
 
-        AudioPod.ParsePlayCounts();
+        LastPod.ParsePlayCounts();
     }
 
     private class BrowseButtonListener implements ActionListener {

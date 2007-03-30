@@ -49,8 +49,8 @@ public class RecentPanel extends JPanel {
         }
 
         public int getRowCount() {
-            if (AudioPod.recentplayed != null) {
-                return AudioPod.recentplayed.size();
+            if (LastPod.recentplayed != null) {
+                return LastPod.recentplayed.size();
             }
 
             return 0;
@@ -68,8 +68,8 @@ public class RecentPanel extends JPanel {
         public Object getValueAt(int row, int col) {
             TrackItem track;
 
-            if (AudioPod.recentplayed != null) {
-                track = (TrackItem) AudioPod.recentplayed.get(row);
+            if (LastPod.recentplayed != null) {
+                track = (TrackItem) LastPod.recentplayed.get(row);
             } else {
                 return new Object();
             }
@@ -112,11 +112,11 @@ public class RecentPanel extends JPanel {
                     throw new RuntimeException("Active must be a Boolean.");
                 }
 
-                if (AudioPod.recentplayed == null) {
+                if (LastPod.recentplayed == null) {
                     throw new RuntimeException("Recent Played list is NULL!");
                 }
 
-                track = (TrackItem) AudioPod.recentplayed.get(row);
+                track = (TrackItem) LastPod.recentplayed.get(row);
                 track.setActive(((Boolean) value));
                 fireTableCellUpdated(row, col);
             }

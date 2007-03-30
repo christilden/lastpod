@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
  * @author muti
  *
  */
-public class AudioPod {
+public class LastPod {
     public static UI UI;
     public static List recentplayed; //parsed using DbReader class
     private static Scrobbler scrobbler;
@@ -26,17 +26,17 @@ public class AudioPod {
         + "username and password.";
 
     private static void Load() {
-        AudioPod.recentplayed = new ArrayList();
-        AudioPod.UI = new UI();
-        AudioPod.UI.buildUI();
+        LastPod.recentplayed = new ArrayList();
+        LastPod.UI = new UI();
+        LastPod.UI.buildUI();
 
-        logger = Logger.getLogger(AudioPod.class.getPackage().getName());
+        logger = Logger.getLogger(LastPod.class.getPackage().getName());
         logger.setLevel(Level.ALL);
         logger.addHandler(new LogHandler());
 
-        AudioPod.ParsePlayCounts();
+        LastPod.ParsePlayCounts();
 
-        AudioPod.UI.makeVisable();
+        LastPod.UI.makeVisable();
     }
 
     public static void ParsePlayCounts() {
@@ -44,7 +44,7 @@ public class AudioPod {
         String iTunesPath = fPrefs.get("iTunes Path", "default");
 
         if (iTunesPath.equals("default")) {
-            logger.log(Level.INFO, AudioPod.NoPrefsError);
+            logger.log(Level.INFO, LastPod.NoPrefsError);
 
             return;
         }
@@ -53,8 +53,8 @@ public class AudioPod {
 
         try {
             reader.parse();
-            AudioPod.recentplayed = reader.getRecentplays();
-            AudioPod.UI.newTrackListAvailable();
+            LastPod.recentplayed = reader.getRecentplays();
+            LastPod.UI.newTrackListAvailable();
         } catch (IOException e) {
             StackTraceElement[] trace = e.getStackTrace();
 
@@ -74,19 +74,19 @@ public class AudioPod {
         String password = fPrefs.get("Password", "default");
 
         if (username.equals("default") && password.equals("default")) {
-            logger.log(Level.INFO, AudioPod.NoPrefsError);
+            logger.log(Level.INFO, LastPod.NoPrefsError);
 
             return;
         }
 
         try {
-            AudioPod.scrobbler = new Scrobbler(username, password);
+            LastPod.scrobbler = new Scrobbler(username, password);
 
             List activeRecentPlayed = onlyActiveTrackItems(recentplayed);
-            AudioPod.scrobbler.handshake(activeRecentPlayed);
-            AudioPod.scrobbler.submittracks(activeRecentPlayed);
-            AudioPod.recentplayed = onlyInactiveTrackItems(recentplayed); //clear recent track list
-            AudioPod.UI.newTrackListAvailable();
+            LastPod.scrobbler.handshake(activeRecentPlayed);
+            LastPod.scrobbler.submittracks(activeRecentPlayed);
+            LastPod.recentplayed = onlyInactiveTrackItems(recentplayed); //clear recent track list
+            LastPod.UI.newTrackListAvailable();
         } catch (Exception e) {
             StackTraceElement[] trace = e.getStackTrace();
 
@@ -145,7 +145,7 @@ public class AudioPod {
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    AudioPod.Load();
+                    LastPod.Load();
                 }
             });
     }

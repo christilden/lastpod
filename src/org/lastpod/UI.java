@@ -86,10 +86,10 @@ public class UI {
                     JButton selectionButton = (JButton) ev.getSource();
 
                     if ("Unselect All".equals(selectionButton.getText())) {
-                        AudioPod.unselectAll();
+                        LastPod.unselectAll();
                         selectionButton.setText("Select All");
                     } else if ("Select All".equals(selectionButton.getText())) {
-                        AudioPod.selectAll();
+                        LastPod.selectAll();
                         selectionButton.setText("Unselect All");
                     }
 
@@ -103,7 +103,7 @@ public class UI {
         button.setMnemonic(KeyEvent.VK_S);
         button.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
-                    AudioPod.SubmitTracks();
+                    LastPod.SubmitTracks();
                 }
             });
         layout.setConstraints(button, c);

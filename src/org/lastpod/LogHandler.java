@@ -23,7 +23,7 @@ public class LogHandler extends Handler {
             return;
         }
 
-        JTextArea logtextarea = AudioPod.UI.getLogtextarea();
+        JTextArea logtextarea = LastPod.UI.getLogtextarea();
         logtextarea.append(record.getMessage() + "\n");
     }
 }
