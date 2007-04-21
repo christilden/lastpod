@@ -100,32 +100,71 @@
       description="Compiles all the source code for the application into your development directory.">
     <mkdir dir="${bin.home}"/>
     <javac srcdir="${src.home}" destdir="${bin.home}" debug="on" optimize="on"
-           target="1.6" source="1.6" deprecation="off" compiler="modern">
+           target="1.4" source="1.4" deprecation="off" compiler="modern">
       <classpath refid="project.classpath"/>
     </javac>
 
     <copy file="${src.home}/org/lastpod/COPYING" todir="${bin.home}/org/lastpod"/>
   </target>
 
-  <target name="test" depends="prepare,compile"
+  <target name="test" depends="prepare,compile,run-debug"
       description="Unit tests the application using JUnit.  Runs all classes with that meet the pattern *Test*.">
-      
+ 
+    <property name="lastpod.debug" value="Debugging is not enabled."/>
+    <property name="lastpod.arg1" value="-D"/>
+    <property name="lastpod.arg2" value="-D"/>
+    <property name="lastpod.arg3" value="-D"/>
+    <property name="lastpod.arg4" value="-D"/>
+
+    <echo message="${lastpod.debug}"/>
     <junit printsummary="no" haltonfailure="yes" forkmode="perBatch">
       <classpath refid="project.classpath"/>
       <assertions><enable/></assertions>
-      <jvmarg value="-Xdebug"/>
-      <jvmarg value="-Xnoagent"/>
-      <jvmarg value="-Djava.compiler=NONE"/>
-      <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9000"/>
+      <jvmarg value="${lastpod.arg1}"/>
+      <jvmarg value="${lastpod.arg2}"/>
+      <jvmarg value="${lastpod.arg3}"/>
+      <jvmarg value="${lastpod.arg4}"/>
 
       <formatter type="brief" usefile="false" />
-      <batchtest fork="yes">
+      <batchtest fork="yes" if="test">
+        <fileset dir="${src.home}">
+          <include name="**/${test}.java"/>
+          <exclude name="**/AllTests.java"/>
+        </fileset>
+      </batchtest>
+      <batchtest fork="yes" unless="test">
         <fileset dir="${src.home}">
           <include name="**/*Test.java"/>
           <exclude name="**/AllTests.java"/>
         </fileset>
       </batchtest>
     </junit>
+  </target>
+
+  <target name="run-debug" if="debug">
+    <property name="lastpod.debug" value="Debugging is enabled on port 4000.  Please start your debugger to continue."/>
+    <property name="lastpod.arg1" value="-Xdebug"/>
+    <property name="lastpod.arg2" value="-Xnoagent"/>
+    <property name="lastpod.arg3" value="-Djava.compiler=NONE"/>
+    <property name="lastpod.arg4" value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=4000"/>
+  </target>
+
+  <target name="run" depends="dist,run-debug"
+      description="Runs the dist jar file with debugging enabled.">
+
+    <property name="lastpod.debug" value="Debugging is not enabled."/>
+    <property name="lastpod.arg1" value="-D"/>
+    <property name="lastpod.arg2" value="-D"/>
+    <property name="lastpod.arg3" value="-D"/>
+    <property name="lastpod.arg4" value="-D"/>
+
+    <echo message="${lastpod.debug}"/>
+    <java jar="${dist.home}/${app.name}.jar" fork="true">
+      <jvmarg value="${lastpod.arg1}"/>
+      <jvmarg value="${lastpod.arg2}"/>
+      <jvmarg value="${lastpod.arg3}"/>
+      <jvmarg value="${lastpod.arg4}"/>
+    </java>
   </target>
 
   <!-- create a jar file for deployment. -->
@@ -141,16 +180,6 @@
             <attribute name="Implementation-Version" value="${app.version} ${TODAY}"/>
         </manifest>
     </jar>
-  </target>
-
-  <target name="debug" depends="dist"
-      description="Runs the dist jar file with debugging enabled.">
-    <java jar="${dist.home}/${app.name}.jar" fork="true">
-      <jvmarg value="-Xdebug"/>
-      <jvmarg value="-Xnoagent"/>
-      <jvmarg value="-Djava.compiler=NONE"/>
-      <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9000"/>
-    </java>
   </target>
 
   <!-- clean up the deploy.home directory -->
