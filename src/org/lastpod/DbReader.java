@@ -259,9 +259,11 @@ public class DbReader {
                 TrackItem temptrack = (TrackItem) this.tracklist.get(i);
                 temptrack.setPlaycount(playcount);
                 temptrack.setLastplayed(lastplayed - temptrack.getLength());
-                if (History.getInstance().isInHistory(temptrack.getLastplayed())){
-                	temptrack.setActive(Boolean.FALSE);
+
+                if (History.getInstance().isInHistory(temptrack.getLastplayed())) {
+                    temptrack.setActive(Boolean.FALSE);
                 }
+
                 this.recentplays.add(this.tracklist.get(i));
             }
 

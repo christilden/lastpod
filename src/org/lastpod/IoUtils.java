@@ -30,7 +30,6 @@ import java.io.Writer;
  * @author Chris Tilden
  */
 public class IoUtils {
-
     /**
      * Cannot construct this utility class.
      */
