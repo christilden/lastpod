@@ -249,13 +249,12 @@ public class Scrobbler {
         this.logger.log(Level.INFO,
             "You must now sync your iPod with your music management software "
             + "or delete 'Play Counts' from the iTunes folder!");
-        
-        
+
         for (int i = 0; i < recentplayed.size(); i++) {
             TrackItem track = (TrackItem) recentplayed.get(i);            
             History.getInstance().addhistory(track.getLastplayed());            
         }
-        
+
         History.getInstance().write();
     }
 }

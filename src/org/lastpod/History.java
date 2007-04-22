@@ -17,26 +17,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * package org.lastpod;
  */
-
-
-/**
- * @author morgan guerin: morgan_guerin@yahoo.fr
- */
-
 package org.lastpod;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * @author morgan guerin: morgan_guerin@yahoo.fr
+ * @author Chris Tilden
+ */
 public class History {
 
 	private Logger logger = Logger.getLogger(this.getClass().getPackage()
@@ -46,11 +44,12 @@ public class History {
 	private static final String URL = "history.txt";
 	private File historyFile = null;
 	private List histories = null;
+    private List newHistories = null;
 
 	public static History getInstance() {
 		if (_instance == null) {
 			_instance = new History(new File(URL));
-			_instance.load();
+			_instance.read();
 		}
 		return _instance;
 	}
@@ -58,54 +57,61 @@ public class History {
 	private History(File historyFile) {
 		this.historyFile = historyFile;
 		histories = new ArrayList();
+        newHistories = new ArrayList();
 	}
 
-	private void load() {
+	private void read() {
+        FileInputStream in = null;
+        InputStreamReader inputStreamReader = null;
+        BufferedReader reader = null;
 
 		try {
-			FileInputStream fis = new FileInputStream(historyFile);
+			in = new FileInputStream(historyFile);
 
-			// Here BufferedInputStream is added for fast reading.
-			BufferedInputStream bis = new BufferedInputStream(fis);
-			DataInputStream dis = new DataInputStream(bis);
+			/* Here BufferedReader is added for fast reading. */
+			inputStreamReader = new InputStreamReader(in);
+			reader = new BufferedReader(inputStreamReader);
 
-			// dis.available() returns 0 if the file does not have more lines.
-			while (dis.available() != 0) {
-				histories.add(dis.readLine());
+			while (reader.ready()) {
+				histories.add(reader.readLine());
 			}
-
-			// dispose all the resources after using them.
-			fis.close();
-			bis.close();
-			dis.close();
-
 		} catch (FileNotFoundException e) {
 			logger.warning("Can't find history file");
 		} catch (IOException e) {
 			logger.warning("Can't read history file");
-		}
+		} finally {
+            /* Dispose of all the resources after using them. */
+            IoUtils.cleanup(reader, null);
+            IoUtils.cleanup(inputStreamReader, null);
+            IoUtils.cleanup(in, null);
+        }
 	}
 
 	public void addhistory(long historyTime) {
-		histories.add(Long.toString(historyTime));
+        newHistories.add(Long.toString(historyTime));
 	}
 
 	public void write() {
+        FileWriter out = null;
+        BufferedWriter bufferedWriter = null;
+
 		try {
-			BufferedWriter out = new BufferedWriter(new FileWriter(historyFile));
+            out = new FileWriter(historyFile);
+            bufferedWriter = new BufferedWriter(out);
 
-			for (int i = 0; i < histories.size(); i++) {
-				out.write((String) histories.get(i) + "\n");
+			for (int i = 0; i < newHistories.size(); i++) {
+                bufferedWriter.write((String) newHistories.get(i) + "\n");
 			}
-
-			out.close();
 		} catch (IOException e) {
 			logger.warning("Error while writting in history file");
-		}
+		} finally {
+            /* Dispose of the resource after using it. */
+            IoUtils.cleanup(null, bufferedWriter);
+            IoUtils.cleanup(null, out);
+        }
 	}
 
 	public boolean isInHistory(long historyTime) {
 		return histories.contains(Long.toString(historyTime));
 	}
-
 }

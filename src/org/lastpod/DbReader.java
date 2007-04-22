@@ -20,7 +20,6 @@
 package org.lastpod;
 
 import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,7 +29,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * @author muti
@@ -41,7 +39,6 @@ public class DbReader {
     private String playcountsfile;
     private BufferedInputStream itunesistream;
     private BufferedInputStream playcountsistream;
-    private List history = null;
     private ArrayList tracklist;
     private ArrayList recentplays; //sorted by play time
 
@@ -162,7 +159,7 @@ public class DbReader {
         for (long i = 0; i < nummhods; i++) {
             this.parsemhod(track);
         }
-        
+
         return track;
     }
 
@@ -310,8 +307,4 @@ public class DbReader {
         for (long i = stream.skip(bytes); i < bytes; i += stream.skip(bytes - i)) {
         }
     }
-    
-  
-    
-    
 }
