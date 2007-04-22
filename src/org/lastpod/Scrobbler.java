@@ -251,8 +251,11 @@ public class Scrobbler {
             + "or delete 'Play Counts' from the iTunes folder!");
 
         for (int i = 0; i < recentplayed.size(); i++) {
-            TrackItem track = (TrackItem) recentplayed.get(i);            
-            History.getInstance().addhistory(track.getLastplayed());            
+            TrackItem track = (TrackItem) recentplayed.get(i);
+
+            if (track.isActive().booleanValue()) {
+                History.getInstance().addhistory(track.getLastplayed());
+            }
         }
 
         History.getInstance().write();
