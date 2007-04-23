@@ -21,12 +21,16 @@ package org.lastpod;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 
@@ -52,15 +56,17 @@ import javax.security.auth.login.FailedLoginException;
 public class Scrobbler {
     private String username;
     private String encryptedPassword;
+    private String backupUrl;
     private String challenge;
     private String submithost;
     private Integer submitport;
     private String submiturl;
     private Logger logger;
 
-    public Scrobbler(String username, String encryptedPassword) {
+    public Scrobbler(String username, String encryptedPassword, String backupUrl) {
         this.username = username;
         this.encryptedPassword = encryptedPassword;
+        this.backupUrl = backupUrl;
         this.logger = Logger.getLogger(this.getClass().getPackage().getName());
     }
 
@@ -188,44 +194,19 @@ public class Scrobbler {
 
         querystring = querystring.substring(0, querystring.length() - 1); //trim last &
 
-        URL url = new URL("http://" + this.submithost + ":" + this.submitport + this.submiturl);
-        this.logger.log(Level.FINE, "Submitting tracks to URL: " + url.toString());
-
-        HttpURLConnection c = (HttpURLConnection) url.openConnection();
-        c.setRequestMethod("POST");
-        c.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        c.setRequestProperty("Content-Length", new Integer(querystring.length()).toString());
-        c.setRequestProperty("Connection", "close");
-        c.setDoInput(true);
-        c.setDoOutput(true);
-        c.setUseCaches(false);
-        c.connect();
-
-        this.logger.log(Level.FINE, "POST query string:\n" + querystring);
-
-        OutputStreamWriter wr = new OutputStreamWriter(c.getOutputStream());
-        wr.write(querystring);
-        wr.flush();
-        wr.close();
-
-        if (c.getResponseCode() != 200) {
-            throw new RuntimeException("Invalid HTTP return code");
-        }
-
-        BufferedReader breader = new BufferedReader(new InputStreamReader(c.getInputStream()));
-
         String content = null;
-        String buffer = null;
 
-        while ((buffer = breader.readLine()) != null) {
-            if (content != null) {
-                content += (buffer + "\n");
-            } else {
-                content = buffer + "\n";
-            }
+        /* If a backup URL is specified then two submits will take place.  A
+         * backup URL can be used to send your information to another server.
+         */
+        if ((backupUrl != null) && !backupUrl.equals("")) {
+            content = fetchContent(backupUrl, querystring);
+            logger.log(Level.FINE, "Received from server:\n" + content);
         }
 
-        this.logger.log(Level.FINE, "Received from server:\n" + content);
+        String urlString = "http://" + submithost + ":" + submitport + submiturl;
+        content = fetchContent(urlString, querystring);
+        logger.log(Level.FINE, "Received from server:\n" + content);
 
         if ((content == null) || (content.length() == 0)) {
             throw new RuntimeException("Invalid response received from AudioScrobbler");
@@ -271,5 +252,75 @@ public class Scrobbler {
         }
 
         History.getInstance().write();
+    }
+
+    /**
+     * Fetches the HTTP content given a URL String and a query String.
+     * @param urlString  The URL to fetch from.
+     * @param querystring  The query String to submit.
+     * @return  The content returned from the request.
+     * @throws MalformedURLException  Thrown if exceptions occur.
+     * @throws IOException  Thrown if exceptions occur.
+     * @throws ProtocolException  Thrown if exceptions occur.
+     */
+    private String fetchContent(String urlString, String querystring)
+            throws MalformedURLException, IOException, ProtocolException {
+        String content = null;
+        URL url = new URL(urlString);
+        this.logger.log(Level.FINE, "Submitting tracks to URL: " + url.toString());
+
+        HttpURLConnection c = (HttpURLConnection) url.openConnection();
+        c.setRequestMethod("POST");
+        c.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        c.setRequestProperty("Content-Length", new Integer(querystring.length()).toString());
+        c.setRequestProperty("Connection", "close");
+        c.setDoInput(true);
+        c.setDoOutput(true);
+        c.setUseCaches(false);
+        c.connect();
+
+        this.logger.log(Level.FINE, "POST query string:\n" + querystring);
+
+        OutputStream out = null;
+        OutputStreamWriter writer = null;
+        InputStream in = null;
+        Reader reader = null;
+        BufferedReader bufferedReader = null;
+
+        try {
+            out = c.getOutputStream();
+            writer = new OutputStreamWriter(out);
+            writer.write(querystring);
+            writer.flush();
+
+            IoUtils.cleanup(null, writer);
+            IoUtils.cleanup(null, out);
+
+            if (c.getResponseCode() != 200) {
+                throw new RuntimeException("Invalid HTTP return code");
+            }
+
+            in = c.getInputStream();
+            reader = new InputStreamReader(in);
+            bufferedReader = new BufferedReader(reader);
+
+            String buffer = null;
+
+            while ((buffer = bufferedReader.readLine()) != null) {
+                if (content != null) {
+                    content += (buffer + "\n");
+                } else {
+                    content = buffer + "\n";
+                }
+            }
+        } finally {
+            IoUtils.cleanup(null, writer);
+            IoUtils.cleanup(null, out);
+            IoUtils.cleanup(bufferedReader, null);
+            IoUtils.cleanup(reader, null);
+            IoUtils.cleanup(in, null);
+        }
+
+        return content;
     }
 }

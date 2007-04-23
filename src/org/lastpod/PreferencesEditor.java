@@ -59,6 +59,7 @@ public class PreferencesEditor {
     private JTextField userfield;
     private JPasswordField passfield;
     private JTextField dbfield;
+    private JTextField backupUrlField;
     private JTextField iTunesfield;
     private JCheckBox iTCheck;
     private JLabel iTunesStatus;
@@ -140,6 +141,7 @@ public class PreferencesEditor {
         //iTunes Panel
         JPanel p4 = new JPanel();
         p4.setLayout(new SpringLayout());
+        p.add(new JLabel());
 
         TitledBorder b4 = BorderFactory.createTitledBorder("iTunes:");
         p4.setBorder(b4);
@@ -217,9 +219,10 @@ public class PreferencesEditor {
             + " to perform a backup of the Last.fm data.";
         p3.setToolTipText(toolTip);
 
-        JLabel j3 = new JLabel("Backup URL: ");
-        p3.add(j3);
-        p3.add(new JTextField());
+        JLabel backupUrlLabel = new JLabel("Backup URL: ");
+        p3.add(backupUrlLabel);
+        backupUrlField = new JTextField();
+        p3.add(backupUrlField);
 
         SpringUtilities.makeCompactGrid(p3, 1, 2, 5, 2, 3, 4);
         p.add(p3);
@@ -307,7 +310,8 @@ public class PreferencesEditor {
     private void matchPreferences() {
         this.userfield.setText(fPrefs.get("Username", "<Username>"));
         this.dbfield.setText(fPrefs.get("iTunes Path", "<iPod iTunes Database Location>"));
-        this.iTunesfield.setText(fPrefs.get("iT Path", "   < Enter iTunes path >   "));
+        this.backupUrlField.setText(fPrefs.get("backupUrl", ""));
+        this.iTunesfield.setText(fPrefs.get("iT Path", ""));
 
         if (fPrefs.get("iTunes Status", "Enabled").equals("Enabled")) {
             this.iTunesStatus.setText("Enabled");
@@ -333,6 +337,7 @@ public class PreferencesEditor {
         }
 
         fPrefs.put("iTunes Path", this.dbfield.getText());
+        fPrefs.put("backupUrl", this.backupUrlField.getText());
         fPrefs.put("iT Path", this.iTunesfield.getText());
         fPrefs.put("iTunes Status", this.iTunesStatus.getText());
 

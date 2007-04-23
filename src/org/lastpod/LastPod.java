@@ -115,8 +115,10 @@ public class LastPod {
             return;
         }
 
+        String backupUrl = fPrefs.get("backupUrl", "");
+
         try {
-            LastPod.scrobbler = new Scrobbler(username, encryptedPassword);
+            LastPod.scrobbler = new Scrobbler(username, encryptedPassword, backupUrl);
 
             List activeRecentPlayed = onlyActiveTrackItems(recentplayed);
             List inactiveRecentPlayed = onlyInactiveTrackItems(recentplayed);
