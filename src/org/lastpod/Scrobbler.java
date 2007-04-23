@@ -249,11 +249,23 @@ public class Scrobbler {
         this.logger.log(Level.INFO,
             "You must now sync your iPod with your music management software "
             + "or delete 'Play Counts' from the iTunes folder!");
+    }
 
-        for (int i = 0; i < recentplayed.size(); i++) {
-            TrackItem track = (TrackItem) recentplayed.get(i);
+    /**
+     * Creates the histories and writes them to a file.
+     * @param activeRecentPlayed  The list of active recently played tracks.
+     * @param inactiveRecentPlayed  The list of inactive recently played tracks.
+     */
+    public void addHistories(List activeRecentPlayed, List inactiveRecentPlayed) {
+        for (int i = 0; i < activeRecentPlayed.size(); i++) {
+            TrackItem track = (TrackItem) activeRecentPlayed.get(i);
+            History.getInstance().addhistory(track.getLastplayed());
+        }
 
-            if (track.isActive().booleanValue()) {
+        for (int i = 0; i < inactiveRecentPlayed.size(); i++) {
+            TrackItem track = (TrackItem) inactiveRecentPlayed.get(i);
+
+            if (History.getInstance().isInHistory(track.getLastplayed())) {
                 History.getInstance().addhistory(track.getLastplayed());
             }
         }

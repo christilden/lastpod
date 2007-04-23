@@ -119,9 +119,13 @@ public class LastPod {
             LastPod.scrobbler = new Scrobbler(username, encryptedPassword);
 
             List activeRecentPlayed = onlyActiveTrackItems(recentplayed);
+            List inactiveRecentPlayed = onlyInactiveTrackItems(recentplayed);
             LastPod.scrobbler.handshake(activeRecentPlayed);
             LastPod.scrobbler.submittracks(activeRecentPlayed);
-            LastPod.recentplayed = onlyInactiveTrackItems(recentplayed); //clear recent track list
+            LastPod.scrobbler.addHistories(activeRecentPlayed, inactiveRecentPlayed);
+
+            /* Clear recent track list. */
+            LastPod.recentplayed = inactiveRecentPlayed;
             LastPod.UI.newTrackListAvailable();
         } catch (Exception e) {
             StackTraceElement[] trace = e.getStackTrace();
