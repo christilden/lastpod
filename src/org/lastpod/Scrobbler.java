@@ -58,30 +58,30 @@ public class Scrobbler {
     private String encryptedPassword;
     private String backupUrl;
     private String challenge;
-    private String submithost;
-    private Integer submitport;
-    private String submiturl;
+    private String submitHost;
+    private Integer submitPort;
+    private String submitUrl;
     private Logger logger;
 
     public Scrobbler(String username, String encryptedPassword, String backupUrl) {
         this.username = username;
         this.encryptedPassword = encryptedPassword;
         this.backupUrl = backupUrl;
-        this.logger = Logger.getLogger(this.getClass().getPackage().getName());
+        logger = Logger.getLogger(getClass().getPackage().getName());
     }
 
-    public void handshake(List recentplayed)
+    public void handshake(List recentPlayed)
             throws UnsupportedEncodingException, MalformedURLException, IOException,
                 FailedLoginException {
-        if (recentplayed.size() == 0) {
+        if (recentPlayed.size() == 0) {
             throw new RuntimeException("No tracks to submit");
         }
 
-        this.logger.log(Level.INFO, "Beginning Handshake");
+        logger.log(Level.INFO, "Beginning Handshake");
 
-        String args = "?hs=true&p=1.1&c=apd&v=0.1&u=" + URLEncoder.encode(this.username, "UTF-8");
+        String args = "?hs=true&p=1.1&c=apd&v=0.1&u=" + URLEncoder.encode(username, "UTF-8");
         URL url = new URL("http://post.audioscrobbler.com/" + args);
-        this.logger.log(Level.FINE, "Handshaking to URL: " + url.toString());
+        logger.log(Level.FINE, "Handshaking to URL: " + url.toString());
 
         HttpURLConnection c = (HttpURLConnection) url.openConnection();
 
@@ -108,7 +108,7 @@ public class Scrobbler {
             }
         }
 
-        this.logger.log(Level.FINE, "Received from server:\n" + content);
+        logger.log(Level.FINE, "Received from server:\n" + content);
 
         if ((content == null) || (content.length() == 0)) {
             throw new RuntimeException("Invalid response received from AudioScrobbler");
@@ -132,67 +132,67 @@ public class Scrobbler {
         Matcher m = p.matcher(lines[2]);
 
         if (m.matches()) {
-            this.submithost = m.group(1);
-            this.submitport = new Integer(m.group(2));
-            this.submiturl = m.group(3);
-            this.logger.log(Level.FINE, "Set submithost to: " + this.submithost);
-            this.logger.log(Level.FINE, "Set submitport to: " + this.submitport);
-            this.logger.log(Level.FINE, "Set submiturl to: " + this.submiturl);
+            submitHost = m.group(1);
+            submitPort = new Integer(m.group(2));
+            submitUrl = m.group(3);
+            logger.log(Level.FINE, "Set submithost to: " + submitHost);
+            logger.log(Level.FINE, "Set submitport to: " + submitPort);
+            logger.log(Level.FINE, "Set submiturl to: " + submitUrl);
         } else {
             throw new RuntimeException("Invalid POST URL returned, unable to continue");
         }
 
-        this.challenge = lines[1];
+        challenge = lines[1];
 
-        this.logger.log(Level.INFO, "Handshake completed");
+        logger.log(Level.INFO, "Handshake completed");
     }
 
-    public void submittracks(List recentplayed)
+    public void submitTracks(final List recentPlayed)
             throws UnsupportedEncodingException, NoSuchAlgorithmException, MalformedURLException,
                 IOException, FailedLoginException {
-        this.logger.log(Level.INFO, "Submitting tracks...");
+        logger.log(Level.INFO, "Submitting tracks...");
 
-        if (recentplayed.size() == 0) {
+        if (recentPlayed.size() == 0) {
             throw new RuntimeException("No tracks to submit");
         }
 
         MessageDigest md = MessageDigest.getInstance("MD5");
-        String md5pass = encryptedPassword + this.challenge;
+        String md5pass = encryptedPassword + challenge;
         String md5chal = MiscUtilities.hexEncode(md.digest(md5pass.getBytes()));
+        String urlEncodedUsername = URLEncoder.encode(username, "UTF-8");
+        String urlEncodedChallange = URLEncoder.encode(md5chal, "UTF-8");
 
-        String querystring =
-            "u=" + URLEncoder.encode(this.username) + "&" + "s=" + URLEncoder.encode(md5chal) + "&";
+        String queryString = "u=" + urlEncodedUsername + "&" + "s=" + urlEncodedChallange;
 
         int tracknum = 0;
 
-        for (int i = 0; i < recentplayed.size(); i++) {
-            TrackItem track = (TrackItem) recentplayed.get(i);
+        for (int i = 0; i < recentPlayed.size(); i++) {
+            TrackItem track = (TrackItem) recentPlayed.get(i);
 
             if (track.getLength() < 30) {
                 continue;
             }
 
+            //TODO: Is all this UTF-8 encoding needed?
             String artistutf8 = new String(track.getArtist().getBytes("UTF-8"), "UTF-8");
             String trackutf8 = new String(track.getTrack().getBytes("UTF-8"), "UTF-8");
             String albumutf8 = new String(track.getAlbum().getBytes("UTF-8"), "UTF-8");
+            String trackString = Long.toString(track.getLength());
             Date date = new Date(track.getLastplayed() * 1000);
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             format.setTimeZone(TimeZone.getTimeZone("GMT:00"));
 
             String datestring = format.format(date);
 
-            querystring += ("a[" + tracknum + "]=" + URLEncoder.encode(artistutf8, "UTF-8") + "&");
-            querystring += ("t[" + tracknum + "]=" + URLEncoder.encode(trackutf8, "UTF-8") + "&");
-            querystring += ("b[" + tracknum + "]=" + URLEncoder.encode(albumutf8, "UTF-8") + "&");
-            querystring += ("m[" + tracknum + "]=" + "&");
-            querystring += ("l[" + tracknum + "]="
-            + URLEncoder.encode(new Long(track.getLength()).toString(), "UTF-8") + "&");
-            querystring += ("i[" + tracknum + "]=" + URLEncoder.encode(datestring, "UTF-8") + "&");
+            queryString += ("&a[" + tracknum + "]=" + URLEncoder.encode(artistutf8, "UTF-8"));
+            queryString += ("&t[" + tracknum + "]=" + URLEncoder.encode(trackutf8, "UTF-8"));
+            queryString += ("&b[" + tracknum + "]=" + URLEncoder.encode(albumutf8, "UTF-8"));
+            queryString += ("&m[" + tracknum + "]=");
+            queryString += ("&l[" + tracknum + "]=" + URLEncoder.encode(trackString, "UTF-8"));
+            queryString += ("&i[" + tracknum + "]=" + URLEncoder.encode(datestring, "UTF-8"));
 
             tracknum++;
         }
-
-        querystring = querystring.substring(0, querystring.length() - 1); //trim last &
 
         String content = null;
 
@@ -200,17 +200,12 @@ public class Scrobbler {
          * backup URL can be used to send your information to another server.
          */
         if ((backupUrl != null) && !backupUrl.equals("")) {
-            content = fetchContent(backupUrl, querystring);
+            content = fetchContent(backupUrl, queryString);
             logger.log(Level.FINE, "Received from server:\n" + content);
         }
 
-        String urlString = "http://" + submithost + ":" + submitport + submiturl;
-        content = fetchContent(urlString, querystring);
-        logger.log(Level.FINE, "Received from server:\n" + content);
-
-        if ((content == null) || (content.length() == 0)) {
-            throw new RuntimeException("Invalid response received from AudioScrobbler");
-        }
+        String urlString = "http://" + submitHost + ":" + submitPort + submitUrl;
+        content = fetchContent(urlString, queryString);
 
         String[] lines = content.split("\n");
 
@@ -226,8 +221,8 @@ public class Scrobbler {
             throw new RuntimeException("Unknown error submitting tracks");
         }
 
-        this.logger.log(Level.INFO, "Tracks submitted");
-        this.logger.log(Level.INFO,
+        logger.log(Level.INFO, "Tracks submitted");
+        logger.log(Level.INFO,
             "You must now sync your iPod with your music management software "
             + "or delete 'Play Counts' from the iTunes folder!");
     }
@@ -257,29 +252,29 @@ public class Scrobbler {
     /**
      * Fetches the HTTP content given a URL String and a query String.
      * @param urlString  The URL to fetch from.
-     * @param querystring  The query String to submit.
+     * @param queryString  The query String to submit.
      * @return  The content returned from the request.
      * @throws MalformedURLException  Thrown if exceptions occur.
      * @throws IOException  Thrown if exceptions occur.
      * @throws ProtocolException  Thrown if exceptions occur.
      */
-    private String fetchContent(String urlString, String querystring)
+    private String fetchContent(String urlString, String queryString)
             throws MalformedURLException, IOException, ProtocolException {
         String content = null;
         URL url = new URL(urlString);
-        this.logger.log(Level.FINE, "Submitting tracks to URL: " + url.toString());
+        logger.log(Level.FINE, "Submitting tracks to URL: " + url.toString());
 
         HttpURLConnection c = (HttpURLConnection) url.openConnection();
         c.setRequestMethod("POST");
         c.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        c.setRequestProperty("Content-Length", new Integer(querystring.length()).toString());
+        c.setRequestProperty("Content-Length", new Integer(queryString.length()).toString());
         c.setRequestProperty("Connection", "close");
         c.setDoInput(true);
         c.setDoOutput(true);
         c.setUseCaches(false);
         c.connect();
 
-        this.logger.log(Level.FINE, "POST query string:\n" + querystring);
+        logger.log(Level.FINE, "POST query string:\n" + queryString);
 
         OutputStream out = null;
         OutputStreamWriter writer = null;
@@ -290,7 +285,7 @@ public class Scrobbler {
         try {
             out = c.getOutputStream();
             writer = new OutputStreamWriter(out);
-            writer.write(querystring);
+            writer.write(queryString);
             writer.flush();
 
             IoUtils.cleanup(null, writer);
@@ -319,6 +314,12 @@ public class Scrobbler {
             IoUtils.cleanup(bufferedReader, null);
             IoUtils.cleanup(reader, null);
             IoUtils.cleanup(in, null);
+        }
+
+        logger.log(Level.FINE, "Received from server:\n" + content);
+
+        if ((content == null) || (content.length() == 0)) {
+            throw new RuntimeException("Invalid response received from AudioScrobbler");
         }
 
         return content;

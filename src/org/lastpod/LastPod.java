@@ -123,7 +123,7 @@ public class LastPod {
             List activeRecentPlayed = onlyActiveTrackItems(recentplayed);
             List inactiveRecentPlayed = onlyInactiveTrackItems(recentplayed);
             LastPod.scrobbler.handshake(activeRecentPlayed);
-            LastPod.scrobbler.submittracks(activeRecentPlayed);
+            LastPod.scrobbler.submitTracks(activeRecentPlayed);
             LastPod.scrobbler.addHistories(activeRecentPlayed, inactiveRecentPlayed);
 
             /* Clear recent track list. */
