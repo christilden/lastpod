@@ -129,7 +129,7 @@ public class UI {
         button.setMnemonic(KeyEvent.VK_P);
         button.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
-                    PreferencesEditor prefeditor = new PreferencesEditor();
+                    PreferencesEditor prefeditor = new PreferencesEditor(frame);
                     prefeditor.buildUI();
                 }
             });

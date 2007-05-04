@@ -38,6 +38,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -54,7 +55,8 @@ import javax.swing.border.TitledBorder;
  */
 public class PreferencesEditor {
     private Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
-    private JFrame frame;
+    private JFrame mainFrame;
+    private JDialog frame;
     private SpringLayout layout;
     private JTextField userfield;
     private JPasswordField passfield;
@@ -65,11 +67,12 @@ public class PreferencesEditor {
     private JLabel iTunesStatus;
     private JButton browsebuttoniTunes;
 
-    public PreferencesEditor() {
+    public PreferencesEditor(JFrame mainFrame) {
+        this.mainFrame = mainFrame;
     }
 
     public void buildUI() {
-        this.frame = new JFrame("Preferences...");
+        this.frame = new JDialog(mainFrame, "Preferences...", true);
         this.layout = new SpringLayout();
         this.frame.getContentPane().setLayout(this.layout);
 
