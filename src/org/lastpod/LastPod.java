@@ -38,7 +38,7 @@ public class LastPod {
     public static List recentplayed; //parsed using DbReader class
     private static Scrobbler scrobbler;
     private static Logger logger;
-    private static String NoPrefsError =
+    private final static String NO_PREFS_ERROR =
         "You have not setup your preferences.\n"
         + "Please click Preferences below to configure the location of "
         + "your iTunesDB (it's on your iPod's drive) and your AudioScrobbler "
@@ -63,7 +63,7 @@ public class LastPod {
         String iTunesPath = fPrefs.get("iTunes Path", "default");
 
         if (iTunesPath.equals("default")) {
-            logger.log(Level.INFO, LastPod.NoPrefsError);
+            logger.log(Level.INFO, LastPod.NO_PREFS_ERROR);
 
             return;
         }
@@ -110,7 +110,7 @@ public class LastPod {
         String encryptedDefault = MiscUtilities.md5DigestPassword("default");
 
         if (username.equals("default") && encryptedPassword.equals(encryptedDefault)) {
-            logger.log(Level.INFO, LastPod.NoPrefsError);
+            logger.log(Level.INFO, LastPod.NO_PREFS_ERROR);
 
             return;
         }
