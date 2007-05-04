@@ -54,6 +54,10 @@ import javax.security.auth.login.FailedLoginException;
  * @version $Id$
  */
 public class Scrobbler {
+    /**
+     * The minimum length (in seconds) of a track that meets Last.fm guidelines.
+     */
+    private static final int MIN_TRACK_SECONDS = 30;
     private String username;
     private String encryptedPassword;
     private String backupUrl;
@@ -61,6 +65,12 @@ public class Scrobbler {
     private String submitHost;
     private Integer submitPort;
     private String submitUrl;
+
+    /**
+     * The number of seconds to pause between submissions. Only if the server
+     * asks to do so.
+     */
+    private int interval = 0;
     private Logger logger;
 
     public Scrobbler(String username, String encryptedPassword, String backupUrl) {
@@ -128,6 +138,12 @@ public class Scrobbler {
             throw new RuntimeException("Update your client:" + lines[0].substring(7));
         }
 
+        /* Sets the interval, if it is present in the response. */
+        if ((lines.length >= 4) && (lines[3].length() >= 10)) {
+            String wait = lines[3].substring(10);
+            interval = Integer.parseInt(wait);
+        }
+
         Pattern p = Pattern.compile("http://(.*):(\\d+)(.*)");
         Matcher m = p.matcher(lines[2]);
 
@@ -161,6 +177,8 @@ public class Scrobbler {
         String md5chal = MiscUtilities.hexEncode(md.digest(md5pass.getBytes()));
         String urlEncodedUsername = URLEncoder.encode(username, "UTF-8");
         String urlEncodedChallange = URLEncoder.encode(md5chal, "UTF-8");
+
+        pauseIfRequired();
 
         String queryString = "u=" + urlEncodedUsername + "&" + "s=" + urlEncodedChallange;
 
@@ -225,6 +243,27 @@ public class Scrobbler {
         logger.log(Level.INFO,
             "You must now sync your iPod with your music management software "
             + "or delete 'Play Counts' from the iTunes folder!");
+    }
+
+    /**
+     * Last.fm will informs this client if it needs to pause.  This occurs when
+     * Last.fm is extremely busy.
+     *
+     * This function will pause the required amount of time if it is needed.
+     *
+     */
+    private void pauseIfRequired() {
+        if (interval != 0) {
+            logger.log(Level.INFO, "The server is busy.  Pausing for " + interval + " seconds.");
+
+            try {
+                Thread.sleep(interval * 1000);
+            } catch (InterruptedException e) {
+                /* If interrupted it will simply submit early.  Therefore
+                 * it will not fail if this occurs.
+                 */
+            }
+        }
     }
 
     /**
