@@ -3,14 +3,13 @@
   <property environment="env"/>
   <property name="classpath"      value="${env.CLASSPATH}"/>
   <property name="java.home"      value="${env.JAVA_HOME}"/>
-  <property name="lib.home"       value="${env.LIB_HOME}"/>
 
   <!-- load all the properties which should be changed for each project. -->
   <property file="build.properties"/>
 
   <!-- these should mostly stay the same -->
   <property name="bin.home"       value="../classes"/>
-  <property name="etc.home"       value="../etc"/>
+  <property name="lib.home"       value="../lib"/>
   <property name="src.home"       value="../src"/>
   <property name="dist.home"      value="../dist"/>
 
@@ -26,7 +25,6 @@
     <include name="jalopy-ant-0.1-1.5rc3.jar"/>
     <include name="antlr-2.7.5.jar"/>
     <include name="log4j-1.2.9.jar"/>
-    <include name="catalina-ant-5.0.28.jar"/>
   </patternset>
 
   <!-- Setup the CLASSPATH for this project. -->
