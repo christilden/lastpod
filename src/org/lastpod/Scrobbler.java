@@ -187,27 +187,14 @@ public class Scrobbler {
         for (int i = 0; i < recentPlayed.size(); i++) {
             TrackItem track = (TrackItem) recentPlayed.get(i);
 
-            if (track.getLength() < 30) {
+            /* Per Last.fm guidelines; do not submit tracks that are less
+             * than 30 characters in length.
+             */
+            if (track.getLength() < MIN_TRACK_SECONDS) {
                 continue;
             }
 
-            //TODO: Is all this UTF-8 encoding needed?
-            String artistutf8 = new String(track.getArtist().getBytes("UTF-8"), "UTF-8");
-            String trackutf8 = new String(track.getTrack().getBytes("UTF-8"), "UTF-8");
-            String albumutf8 = new String(track.getAlbum().getBytes("UTF-8"), "UTF-8");
-            String trackString = Long.toString(track.getLength());
-            Date date = new Date(track.getLastplayed() * 1000);
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            format.setTimeZone(TimeZone.getTimeZone("GMT:00"));
-
-            String datestring = format.format(date);
-
-            queryString += ("&a[" + tracknum + "]=" + URLEncoder.encode(artistutf8, "UTF-8"));
-            queryString += ("&t[" + tracknum + "]=" + URLEncoder.encode(trackutf8, "UTF-8"));
-            queryString += ("&b[" + tracknum + "]=" + URLEncoder.encode(albumutf8, "UTF-8"));
-            queryString += ("&m[" + tracknum + "]=");
-            queryString += ("&l[" + tracknum + "]=" + URLEncoder.encode(trackString, "UTF-8"));
-            queryString += ("&i[" + tracknum + "]=" + URLEncoder.encode(datestring, "UTF-8"));
+            queryString += buildTrackQueryString(track, tracknum);
 
             tracknum++;
         }
@@ -264,6 +251,39 @@ public class Scrobbler {
                  */
             }
         }
+    }
+
+    /**
+     * Builds the query string for the given <code>TrackItem</code> and track
+     * number.
+     * @param track  The track to build a query string of.
+     * @param trackNum  The number of the track in the submission.
+     * @return  The complete query string for the given track.
+     * @throws UnsupportedEncodingException  Thrown if errors occur.
+     */
+    private String buildTrackQueryString(TrackItem track, int trackNum)
+            throws UnsupportedEncodingException {
+        StringBuffer trackQueryString = new StringBuffer();
+
+        //TODO: Is all this UTF-8 encoding needed?
+        String artistutf8 = new String(track.getArtist().getBytes("UTF-8"), "UTF-8");
+        String trackutf8 = new String(track.getTrack().getBytes("UTF-8"), "UTF-8");
+        String albumutf8 = new String(track.getAlbum().getBytes("UTF-8"), "UTF-8");
+        String trackString = Long.toString(track.getLength());
+        Date date = new Date(track.getLastplayed() * 1000);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("GMT:00"));
+
+        String dateString = format.format(date);
+
+        trackQueryString.append("&a[" + trackNum + "]=" + URLEncoder.encode(artistutf8, "UTF-8"));
+        trackQueryString.append("&t[" + trackNum + "]=" + URLEncoder.encode(trackutf8, "UTF-8"));
+        trackQueryString.append("&b[" + trackNum + "]=" + URLEncoder.encode(albumutf8, "UTF-8"));
+        trackQueryString.append("&m[" + trackNum + "]=");
+        trackQueryString.append("&l[" + trackNum + "]=" + URLEncoder.encode(trackString, "UTF-8"));
+        trackQueryString.append("&i[" + trackNum + "]=" + URLEncoder.encode(dateString, "UTF-8"));
+
+        return trackQueryString.toString();
     }
 
     /**
