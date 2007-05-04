@@ -330,6 +330,9 @@ public class PreferencesEditor {
     }
 
     private void savePreferences() {
+        String oldItunesPath = fPrefs.get("iTunes Path", "<iPod iTunes Database Location>");
+        String newItunesPath = dbfield.getText();
+
         fPrefs.put("Username", this.userfield.getText());
 
         String password = new String(passfield.getPassword());
@@ -339,7 +342,7 @@ public class PreferencesEditor {
             fPrefs.put("encryptedPassword", encryptedPassword);
         }
 
-        fPrefs.put("iTunes Path", this.dbfield.getText());
+        fPrefs.put("iTunes Path", newItunesPath);
         fPrefs.put("backupUrl", this.backupUrlField.getText());
         fPrefs.put("iT Path", this.iTunesfield.getText());
         fPrefs.put("iTunes Status", this.iTunesStatus.getText());
@@ -351,9 +354,14 @@ public class PreferencesEditor {
             logger.log(Level.WARNING, "Unable to save preferences: " + e.toString());
         }
 
-        LastPod.recentplayed = new ArrayList();
-        LastPod.ParsePlayCounts();
-        LastPod.UI.newTrackListAvailable();
+        /* Only reloads the track list when the iTunes Path has been
+         * changed.
+         */
+        if (!oldItunesPath.equals(newItunesPath)) {
+            LastPod.recentplayed = new ArrayList();
+            LastPod.ParsePlayCounts();
+            LastPod.UI.newTrackListAvailable();
+        }
     }
 
     private class BrowseButtonListeneriPod implements ActionListener {
