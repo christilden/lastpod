@@ -139,7 +139,7 @@ public class Scrobbler {
 
         /* Sets the interval, if it is present in the response. */
         if ((lines.length >= 4) && (lines[3].length() >= 10)) {
-            String wait = lines[3].substring(10);
+            String wait = lines[3].substring(9);
             interval = Integer.parseInt(wait);
         }
 
