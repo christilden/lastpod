@@ -18,6 +18,9 @@
  */
 package org.lastpod;
 
+import org.lastpod.chunk.Chunk;
+import org.lastpod.chunk.ChunkUtil;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,6 +56,11 @@ import javax.security.auth.login.FailedLoginException;
  * @version $Id$
  */
 public class Scrobbler {
+    /**
+     * AudioScrobbler suggests a maximum number of tracks per chunk.
+     */
+    private static final int MAX_TRACKS_PER_CHUNK = 10;
+
     /**
      * The minimum length (in seconds) of a track that meets Last.fm guidelines.
      */
@@ -177,52 +185,70 @@ public class Scrobbler {
         String urlEncodedUsername = URLEncoder.encode(username, "UTF-8");
         String urlEncodedChallange = URLEncoder.encode(md5chal, "UTF-8");
 
-        pauseIfRequired();
+        /* Converts the recentPlayed List into a List of Chunk objects.  Each
+         * chunk stores at most 10 tracks.  Each chunk will be submitted to
+         * Last.fm individually, per their guidelines.
+         */
+        List chunks = ChunkUtil.createChunks(recentPlayed, MAX_TRACKS_PER_CHUNK);
 
-        String queryString = "u=" + urlEncodedUsername + "&" + "s=" + urlEncodedChallange;
+        Chunk chunk = null;
 
-        int tracknum = 0;
+        for (int i = 0; i < chunks.size(); i++) {
+            pauseIfRequired();
 
-        for (int i = 0; i < recentPlayed.size(); i++) {
-            TrackItem track = (TrackItem) recentPlayed.get(i);
+            chunk = (Chunk) chunks.get(i);
 
-            /* Per Last.fm guidelines; do not submit tracks that are less
-             * than 30 characters in length.
-             */
-            if (track.getLength() < MIN_TRACK_SECONDS) {
-                continue;
+            String queryString = "u=" + urlEncodedUsername + "&" + "s=" + urlEncodedChallange;
+
+            int tracknum = 0;
+
+            for (int j = 0; j < chunk.getChunkSize(); j++) {
+                TrackItem track = (TrackItem) chunk.getContent().get(j);
+
+                /* Per Last.fm guidelines; do not submit tracks that are less
+                 * than 30 characters in length.
+                 */
+                if (track.getLength() < MIN_TRACK_SECONDS) {
+                    continue;
+                }
+
+                queryString += buildTrackQueryString(track, tracknum);
+
+                tracknum++;
             }
 
-            queryString += buildTrackQueryString(track, tracknum);
+            String content = null;
 
-            tracknum++;
-        }
+            /* If a backup URL is specified then two submits will take place.  A
+             * backup URL can be used to send your information to another server.
+             */
+            if ((backupUrl != null) && !backupUrl.equals("")) {
+                content = fetchContent(backupUrl, queryString);
+                logger.log(Level.FINE, "Received from server:\n" + content);
+            }
 
-        String content = null;
+            String urlString = "http://" + submitHost + ":" + submitPort + submitUrl;
+            content = fetchContent(urlString, queryString);
 
-        /* If a backup URL is specified then two submits will take place.  A
-         * backup URL can be used to send your information to another server.
-         */
-        if ((backupUrl != null) && !backupUrl.equals("")) {
-            content = fetchContent(backupUrl, queryString);
-            logger.log(Level.FINE, "Received from server:\n" + content);
-        }
+            String[] lines = content.split("\n");
 
-        String urlString = "http://" + submitHost + ":" + submitPort + submitUrl;
-        content = fetchContent(urlString, queryString);
+            /* Sets the interval, if it is present in the response. */
+            if ((lines.length >= 2) && (lines[1].length() >= 10)) {
+                String wait = lines[1].substring(9);
+                interval = Integer.parseInt(wait);
+            }
 
-        String[] lines = content.split("\n");
+            if ((lines[0].length() >= 6) && lines[0].substring(0, 6).equals("FAILED")) {
+                throw new RuntimeException(lines[0].substring(7));
+            }
 
-        if ((lines[0].length() >= 6) && lines[0].substring(0, 6).equals("FAILED")) {
-            throw new RuntimeException(lines[0].substring(7));
-        }
+            if ((lines[0].length() >= 7) && lines[0].substring(0, 7).equals("BADAUTH")) {
+                throw new FailedLoginException("Invalid username/password");
+            }
 
-        if ((lines[0].length() >= 7) && lines[0].substring(0, 7).equals("BADAUTH")) {
-            throw new FailedLoginException("Invalid username/password");
-        }
-
-        if ((lines[0].length() >= 2) && !lines[0].substring(0, 2).equals("OK")) {
-            throw new RuntimeException("Unknown error submitting tracks");
+            if ((lines[0].length() >= 2) && !lines[0].substring(0, 2).equals("OK")) {
+                throw new RuntimeException("Unknown error submitting tracks");
+            }
         }
 
         logger.log(Level.INFO, "Tracks submitted");
