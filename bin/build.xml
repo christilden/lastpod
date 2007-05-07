@@ -10,7 +10,8 @@
   <!-- these should mostly stay the same -->
   <property name="bin.home"       value="../classes"/>
   <property name="lib.home"       value="../lib"/>
-  <property name="src.home"       value="../src"/>
+  <property name="src.home"       value="../src/main"/>
+  <property name="test.home"       value="../src/test"/>
   <property name="dist.home"      value="../dist"/>
 
   <!-- We do not want to copy source control files when we build -->
@@ -69,9 +70,8 @@
             loglevel="info"
             threads="1"
             classpathref="project.classpath">
-      <fileset dir="${src.home}">
-        <include name="**/*.java" />
-      </fileset>
+      <fileset dir="${src.home}" includes="**/*.java"/>
+      <fileset dir="${test.home}" includes="**/*.java"/>
     </jalopy>
   </target>
 
@@ -81,6 +81,7 @@
     <checkstyle config="sun_checks.xml">
       <classpath refid="project.classpath"/>
       <fileset dir="${src.home}" includes="**/*.java"/>
+      <fileset dir="${test.home}" includes="**/*.java"/>
     </checkstyle>
   </target>
 
@@ -101,8 +102,15 @@
            target="1.4" source="1.4" deprecation="off" compiler="modern">
       <classpath refid="project.classpath"/>
     </javac>
+    <javac srcdir="${test.home}" destdir="${bin.home}" debug="on" optimize="on"
+           target="1.4" source="1.4" deprecation="off" compiler="modern">
+      <classpath>
+        <path refid="project.classpath"/>
+        <path location="${bin.home}"/>
+      </classpath>
+    </javac>
 
-    <copy file="${src.home}/org/lastpod/COPYING" todir="${bin.home}/org/lastpod"/>
+    <copy file="${src.home}/../COPYING" todir="${bin.home}/org/lastpod"/>
   </target>
 
   <target name="test" depends="prepare,compile,run-debug"
@@ -116,7 +124,10 @@
 
     <echo message="${lastpod.debug}"/>
     <junit printsummary="no" haltonfailure="yes" forkmode="perBatch">
-      <classpath refid="project.classpath"/>
+      <classpath>
+        <path refid="project.classpath"/>
+        <path location="${bin.home}"/>
+      </classpath>
       <assertions><enable/></assertions>
       <jvmarg value="${lastpod.arg1}"/>
       <jvmarg value="${lastpod.arg2}"/>
@@ -125,13 +136,13 @@
 
       <formatter type="brief" usefile="false" />
       <batchtest fork="yes" if="test">
-        <fileset dir="${src.home}">
+        <fileset dir="${test.home}">
           <include name="**/${test}.java"/>
           <exclude name="**/AllTests.java"/>
         </fileset>
       </batchtest>
       <batchtest fork="yes" unless="test">
-        <fileset dir="${src.home}">
+        <fileset dir="${test.home}">
           <include name="**/*Test.java"/>
           <exclude name="**/AllTests.java"/>
         </fileset>
@@ -171,7 +182,8 @@
     <tstamp>
         <format property="TODAY" pattern="MM/dd/yyyy"/>
     </tstamp>
-    <jar destfile="${dist.home}/${app.name}.jar" basedir="${bin.home}">
+    <jar destfile="${dist.home}/${app.name}.jar" basedir="${bin.home}"
+        excludes="**/*Test.class">
         <manifest>
             <attribute name="Built-By" value="Chris Tilden"/>
             <attribute name="Main-Class" value="org.lastpod.LastPod"/>

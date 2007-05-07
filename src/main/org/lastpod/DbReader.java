@@ -1,6 +1,6 @@
 /*
  * LastPod is an application used to publish one's iPod play counts to Last.fm.
- * Copyright (C) 2007  muti, Chris Tilden
+ * Copyright (C) 2007  Chris Tilden
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

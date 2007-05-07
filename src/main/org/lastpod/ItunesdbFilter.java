@@ -1,6 +1,6 @@
 /*
  * LastPod is an application used to publish one's iPod play counts to Last.fm.
- * Copyright (C) 2007  muti, Chris Tilden
+ * Copyright (C) 2007  Chris Tilden
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,15 +24,15 @@ import javax.swing.filechooser.FileFilter;
 
 /**
  * @author Muti
- *
+ * @version $Id$
  */
-public class ExeFileFilter extends FileFilter {
+public class ItunesdbFilter extends FileFilter {
     public boolean accept(File f) {
         if (f.isDirectory()) {
             return true;
         }
 
-        if (f.getName().endsWith(".exe")) {
+        if (f.getName().equals("iTunesDB")) {
             return true;
         }
 
@@ -40,6 +40,6 @@ public class ExeFileFilter extends FileFilter {
     }
 
     public String getDescription() {
-        return "*.exe";
+        return "iTunesDB Files";
     }
 }
