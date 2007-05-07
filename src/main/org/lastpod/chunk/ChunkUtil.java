@@ -27,7 +27,7 @@ import java.util.List;
  * List.
  * @author Chris Tilden
  */
-public class ChunkUtil {
+public final class ChunkUtil {
     /**
      * The original list.
      */

@@ -18,6 +18,8 @@
  */
 package org.lastpod;
 
+import org.lastpod.util.IoUtils;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;

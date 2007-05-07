@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.lastpod;
+package org.lastpod.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +28,7 @@ import java.io.Writer;
  * Contains various I/O utility functions.
  * @author Chris Tilden
  */
-public class IoUtils {
+public final class IoUtils {
     /**
      * Cannot construct this utility class.
      */

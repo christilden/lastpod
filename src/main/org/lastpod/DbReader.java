@@ -30,22 +30,49 @@ import java.util.Calendar;
 import java.util.Collections;
 
 /**
+ * Reads the iTunes database directly from the iPod.
  * @author muti
+ * @author Chris Tilden
  * @version $Id$
  */
 public class DbReader {
+    /**
+     * The location of the iTunes database file.
+     */
     private String itunesfile;
+
+    /**
+     * The location of the iPod play counts file.
+     */
     private String playcountsfile;
+
+    /**
+     * A buffered stream that reads the iTunes database file.
+     */
     private BufferedInputStream itunesistream;
+
+    /**
+     * A buffered stream that reads the iPod play counts file.
+     */
     private BufferedInputStream playcountsistream;
+
+    /**
+     * A list of all the tracks from the iTunes databaes file.
+     */
     private ArrayList tracklist;
-    private ArrayList recentplays; //sorted by play time
+
+    /**
+     * A list of the recently played tracks from the iPod play counts file.
+     * (Sorted by play time. This is important because otherwise Last.fm will
+     * reject them.)
+     */
+    private ArrayList recentplays;
 
     /**
      * Initializes the class with the locations of the iPod DB files.
      *
-     * @param    itunespath    Directory containing the iTunesDB and the corresponding
-     *                         Play Counts, including trailing "\" or "/"
+     * @param itunespath  Directory containing the iTunesDB and the corresponding
+     *                         Play Counts, including trailing "\" or "/".
      */
     public DbReader(String itunespath) {
         if (!itunespath.endsWith(File.separator)) {
@@ -59,6 +86,7 @@ public class DbReader {
     }
 
     /**
+     * Gets the recent plays.
      * @return Returns recent plays.
      */
     public ArrayList getRecentplays() {
@@ -68,8 +96,7 @@ public class DbReader {
     /**
      * Attempts to open and parse the DB & Play Counts files, creating
      * the appropriate data structures.
-     *
-     * @throws IOException
+     * @throws IOException  Thrown if errors occur.
      */
     public void parse() throws IOException {
         try {
@@ -99,9 +126,8 @@ public class DbReader {
     }
 
     /**
-     * Parses track information from the iTunesDB
-     *
-     * @throws IOException
+     * Parses track information from the iTunesDB.
+     * @throws IOException  Thrown if errors occur.
      */
     public void parseitunesdb() throws IOException {
         byte[] buf = new byte[1];
@@ -125,10 +151,9 @@ public class DbReader {
     }
 
     /**
-     * Parses an MHIT object from the iTunes Database
-     *
+     * Parses an MHIT object from the iTunes Database.
      * @return Returns parsed track object.
-     * @throws IOException
+     * @throws IOException  Thrown if errors occur.
      */
     public TrackItem parsemhit() throws IOException {
         byte[] dword = new byte[4];
@@ -138,22 +163,22 @@ public class DbReader {
 
         this.itunesistream.read(dword);
 
-        long headersize = DbReader.LittleEndianToBigInt(dword).longValue();
+        long headersize = DbReader.littleEndianToBigInt(dword).longValue();
 
-        DbReader.SkipFully(this.itunesistream, 4);
+        DbReader.skipFully(this.itunesistream, 4);
         this.itunesistream.read(dword);
 
-        long nummhods = DbReader.LittleEndianToBigInt(dword).longValue();
+        long nummhods = DbReader.littleEndianToBigInt(dword).longValue();
 
         this.itunesistream.read(dword);
-        track.setTrackid(DbReader.LittleEndianToBigInt(dword).longValue());
+        track.setTrackid(DbReader.littleEndianToBigInt(dword).longValue());
 
-        DbReader.SkipFully(this.itunesistream, 20);
+        DbReader.skipFully(this.itunesistream, 20);
         this.itunesistream.read(dword);
-        track.setLength(DbReader.LittleEndianToBigInt(dword).longValue() / 1000);
+        track.setLength(DbReader.littleEndianToBigInt(dword).longValue() / 1000);
 
         this.itunesistream.reset();
-        DbReader.SkipFully(this.itunesistream, headersize - 4); //skip to end of MHIT
+        DbReader.skipFully(this.itunesistream, headersize - 4); //skip to end of MHIT
 
         for (long i = 0; i < nummhods; i++) {
             this.parsemhod(track);
@@ -163,33 +188,32 @@ public class DbReader {
     }
 
     /**
-     * Parses an MHOD object and sets proper fields in the track item object
-     *
-     * @param    TrackItem    Track Item
-     * @throws IOException
+     * Parses an MHOD object and sets proper fields in the track item object.
+     * @param track  Track Item.
+     * @throws IOException  Thrown if errors occur.
      */
     public void parsemhod(TrackItem track) throws IOException {
         byte[] dword = new byte[4];
 
         this.itunesistream.mark(1048576); //mark beginning of MHOD location
 
-        DbReader.SkipFully(this.itunesistream, 8);
+        DbReader.skipFully(this.itunesistream, 8);
 
         this.itunesistream.read(dword);
 
-        long totalsize = DbReader.LittleEndianToBigInt(dword).longValue();
+        long totalsize = DbReader.littleEndianToBigInt(dword).longValue();
 
         this.itunesistream.read(dword);
 
-        int mhodtype = DbReader.LittleEndianToBigInt(dword).intValue();
+        int mhodtype = DbReader.littleEndianToBigInt(dword).intValue();
 
         if ((mhodtype == 1) || (mhodtype == 3) || (mhodtype == 4)) {
-            DbReader.SkipFully(this.itunesistream, 12);
+            DbReader.skipFully(this.itunesistream, 12);
             this.itunesistream.read(dword);
 
-            int strlen = DbReader.LittleEndianToBigInt(dword).intValue();
+            int strlen = DbReader.littleEndianToBigInt(dword).intValue();
 
-            DbReader.SkipFully(this.itunesistream, 8);
+            DbReader.skipFully(this.itunesistream, 8);
 
             byte[] data = new byte[strlen];
             this.itunesistream.read(data);
@@ -215,39 +239,38 @@ public class DbReader {
         }
 
         this.itunesistream.reset();
-        DbReader.SkipFully(this.itunesistream, totalsize);
+        DbReader.skipFully(this.itunesistream, totalsize);
     }
 
     /**
-     * Parses play counts information from "Play Counts"
-     *
-     * @throws IOException
+     * Parses play counts information from "Play Counts".
+     * @throws IOException  Thrown if errors occur.
      */
     public void parseplaycounts() throws IOException {
         byte[] dword = new byte[4];
 
-        DbReader.SkipFully(this.playcountsistream, 8);
+        DbReader.skipFully(this.playcountsistream, 8);
         this.playcountsistream.read(dword);
 
-        long entrylen = DbReader.LittleEndianToBigInt(dword).longValue();
+        long entrylen = DbReader.littleEndianToBigInt(dword).longValue();
 
         this.playcountsistream.read(dword);
 
-        int numentries = DbReader.LittleEndianToBigInt(dword).intValue();
+        int numentries = DbReader.littleEndianToBigInt(dword).intValue();
 
-        DbReader.SkipFully(this.playcountsistream, 80); //skip rest of header
+        DbReader.skipFully(this.playcountsistream, 80); //skip rest of header
 
         for (int i = 0; i < (numentries - 1); i++) {
             this.playcountsistream.mark(1048576); //save beginning of entry location
 
             this.playcountsistream.read(dword);
 
-            long playcount = DbReader.LittleEndianToBigInt(dword).longValue();
+            long playcount = DbReader.littleEndianToBigInt(dword).longValue();
 
             if (playcount > 0) {
                 this.playcountsistream.read(dword);
 
-                long lastplayed = DbReader.LittleEndianToBigInt(dword).longValue();
+                long lastplayed = DbReader.littleEndianToBigInt(dword).longValue();
                 lastplayed -= 2082844800; //convert to UNIX timestamp
 
                 Calendar calendar = Calendar.getInstance();
@@ -267,19 +290,18 @@ public class DbReader {
             }
 
             this.playcountsistream.reset();
-            DbReader.SkipFully(this.playcountsistream, entrylen);
+            DbReader.skipFully(this.playcountsistream, entrylen);
         }
 
         Collections.sort(this.recentplays);
     }
 
     /**
-     * This converts any size byte array to a BigInteger
-     *
-     * @param Little-Endian byte array
-     * @return BigInt
+     * This converts any size byte array to a BigInteger.
+     * @param num  Little-Endian byte array.
+     * @return A BigInt.
      */
-    public static BigInteger LittleEndianToBigInt(byte[] num) {
+    public static BigInteger littleEndianToBigInt(byte[] num) {
         byte temp;
 
         int upperBound = num.length - 1;
@@ -297,15 +319,15 @@ public class DbReader {
     }
 
     /**
-     * Guarantees that the specified number of bytes will be skipped
-     *
-     * @param Input Stream
-     * @param Number of bytes to skip
-     * @throws IOException
+     * Guarantees that the specified number of bytes will be skipped.
+     * @param stream Input Stream.
+     * @param bytes Number of bytes to skip.
+     * @throws IOException  Thrown if errors occur.
      */
-    public static void SkipFully(BufferedInputStream stream, long bytes)
+    public static void skipFully(BufferedInputStream stream, long bytes)
             throws IOException {
         for (long i = stream.skip(bytes); i < bytes; i += stream.skip(bytes - i)) {
+            /* The loop itself performs all the logic needed to skip. */
         }
     }
 }

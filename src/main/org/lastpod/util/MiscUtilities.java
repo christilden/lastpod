@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.lastpod;
+package org.lastpod.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,7 +26,7 @@ import java.security.NoSuchAlgorithmException;
  * @author Chris Tilden
  * @version $Id$
  */
-public class MiscUtilities {
+public final class MiscUtilities {
     /**
      * Make sure this class is not instantiated directly.
      */

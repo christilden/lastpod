@@ -21,6 +21,9 @@ package org.lastpod;
 import org.lastpod.chunk.Chunk;
 import org.lastpod.chunk.ChunkUtil;
 
+import org.lastpod.util.IoUtils;
+import org.lastpod.util.MiscUtilities;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

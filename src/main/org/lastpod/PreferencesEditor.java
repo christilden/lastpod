@@ -18,6 +18,9 @@
  */
 package org.lastpod;
 
+import org.lastpod.util.MiscUtilities;
+import org.lastpod.util.SpringUtilities;
+
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;

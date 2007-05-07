@@ -21,7 +21,7 @@ package org.lastpod.chunk;
 import java.util.List;
 
 /**
- * Stores a chunk of tracks to be submitted to Last.fm
+ * Stores a chunk of tracks to be submitted to Last.fm.
  * @author Chris Tilden
  */
 public class Chunk {

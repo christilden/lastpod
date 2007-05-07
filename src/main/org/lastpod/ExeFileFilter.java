@@ -23,10 +23,17 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
 /**
+ * Implements a simple <code>FileFilter</code> to display only .exe files.
  * @author Muti
- *
+ * @author Chris Tilden
  */
 public class ExeFileFilter extends FileFilter {
+    /**
+     * Filters a given file and returns <code>true</code> if it should be
+     * displayed.
+     * @param f  The file to filter.
+     * @return  <code>true</code> if the file should be displayed.
+     */
     public boolean accept(File f) {
         if (f.isDirectory()) {
             return true;
@@ -39,6 +46,10 @@ public class ExeFileFilter extends FileFilter {
         return false;
     }
 
+    /**
+     * Gets the description that will be displayed in the dialog box.
+     * @return  The description.
+     */
     public String getDescription() {
         return "*.exe";
     }

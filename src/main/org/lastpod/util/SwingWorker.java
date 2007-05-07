@@ -33,7 +33,14 @@ import javax.swing.SwingUtilities;
  * creating it.
  */
 public abstract class SwingWorker {
+    /**
+     * The value to return upon completion or interupt.
+     */
     private Object value;
+
+    /**
+     * The thread to use to perform the work.
+     */
     private ThreadVar threadVar;
 
     /**
@@ -66,22 +73,25 @@ public abstract class SwingWorker {
     }
 
     /**
-     * Get the value produced by the worker thread, or null if it
-     * hasn't been constructed yet.
+     * Gets the value produced by the worker thread, or null if it
+     * has not been constructed yet.
+     * @return  The value produced by the worker thread.
      */
     protected synchronized Object getValue() {
         return value;
     }
 
     /**
-     * Set the value produced by worker thread
+     * Sets the value produced by worker thread.
+     * @param x  The value to set.
      */
     private synchronized void setValue(Object x) {
         value = x;
     }
 
     /**
-     * Compute the value to be returned by the <code>get</code> method.
+     * Computes the value to be returned by the <code>get</code> method.
+     * @return  The value to return from the worker thread.
      */
     public abstract Object construct();
 
@@ -110,7 +120,6 @@ public abstract class SwingWorker {
      * Return the value created by the <code>construct</code> method.
      * Returns null if either the constructing thread or the current
      * thread was interrupted before a value was produced.
-     *
      * @return the value created by the <code>construct</code> method
      */
     public Object get() {
@@ -147,16 +156,30 @@ public abstract class SwingWorker {
      * under separate synchronization control.
      */
     private static class ThreadVar {
+        /**
+         * The thread to use.
+         */
         private Thread thread;
 
+        /**
+         * Constructs this object with a given Thread.
+         * @param t  The thread to construct with.
+         */
         ThreadVar(Thread t) {
             thread = t;
         }
 
+        /**
+         * Gets the Thread.
+         * @return  The Thread.
+         */
         synchronized Thread get() {
             return thread;
         }
 
+        /**
+         * Clears the Thread out.
+         */
         synchronized void clear() {
             thread = null;
         }
