@@ -29,7 +29,9 @@ import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 
 /**
+ * The LastPod controller.
  * @author muti
+ * @author Chris Tilden
  * @version $Id$
  */
 public class LastPod {
@@ -86,7 +88,7 @@ public class LastPod {
         }
     }
 
-    public static void SubmitTracks() {
+    public static Object SubmitTracks() {
         Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
         String username = fPrefs.get("Username", "default");
         String password = fPrefs.get("Password", "default");
@@ -111,7 +113,7 @@ public class LastPod {
         if (username.equals("default") && encryptedPassword.equals(encryptedDefault)) {
             logger.log(Level.INFO, LastPod.NO_PREFS_ERROR);
 
-            return;
+            return LastPod.NO_PREFS_ERROR;
         }
 
         String backupUrl = fPrefs.get("backupUrl", "");
@@ -122,7 +124,7 @@ public class LastPod {
             List activeRecentPlayed = onlyActiveTrackItems(recentplayed);
             List inactiveRecentPlayed = onlyInactiveTrackItems(recentplayed);
             LastPod.scrobbler.handshake(activeRecentPlayed);
-            LastPod.scrobbler.submitTracks(activeRecentPlayed);
+            LastPod.scrobbler.submitTracks(activeRecentPlayed, LastPod.UI);
             LastPod.scrobbler.addHistories(activeRecentPlayed, inactiveRecentPlayed);
 
             /* Clear recent track list. */
@@ -140,6 +142,8 @@ public class LastPod {
             logger.log(Level.SEVERE, e.toString());
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
         }
+
+        return "Success";
     }
 
     private static List onlyActiveTrackItems(List recentPlayed) {

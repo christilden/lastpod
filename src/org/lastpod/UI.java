@@ -18,6 +18,8 @@
  */
 package org.lastpod;
 
+import org.lastpod.util.SwingWorker;
+
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -34,16 +36,37 @@ import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 /**
+ * Contains the LastPod user interface. (UI)  The UI interacts with the LastPod
+ * controller.
  * @author muti
+ * @author Chris Tilden
  * @version $Id$
  */
-public class UI {
+public class UI implements ChunkProgress {
     private RecentPanel recentpanel;
     private JTextArea logtextarea;
+
+    /**
+     * The submit button.
+     */
+    private JButton submitButton;
+
+    /**
+     * Displays the progress of the submit.
+     */
+    private JProgressBar progressBar = null;
+
+    /**
+     * This worker is used to perform the submission and is a nice threaded
+     * implementation.
+     */
+    private SwingWorker worker;
     private JFrame frame;
 
     /**
@@ -155,15 +178,37 @@ public class UI {
         layout.setConstraints(button, c);
         frame.getContentPane().add(button);
 
-        button = new JButton("Submit Tracks");
-        button.setMnemonic(KeyEvent.VK_S);
-        button.addActionListener(new ActionListener() {
+        submitButton = new JButton("Submit Tracks");
+        submitButton.setMnemonic(KeyEvent.VK_S);
+        submitButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
-                    LastPod.SubmitTracks();
+                    submitButton.setEnabled(false);
+
+                    /* Invoking start() on the SwingWorker causes a new Thread
+                     * to be created that will call construct(), and then
+                     * finished().  Note that finished() is called even if
+                     * the worker is interrupted because we catch the
+                     * InterruptedException in doWork().
+                     */
+                    worker =
+                        new SwingWorker() {
+                                public Object construct() {
+                                    return LastPod.SubmitTracks();
+                                }
+
+                                public void finished() {
+                                    submitButton.setEnabled(true);
+                                }
+                            };
+                    worker.start();
                 }
             });
-        layout.setConstraints(button, c);
-        frame.getContentPane().add(button);
+        layout.setConstraints(submitButton, c);
+        frame.getContentPane().add(submitButton);
+
+        progressBar = new JProgressBar();
+        layout.setConstraints(progressBar, c);
+        frame.getContentPane().add(progressBar);
     }
 
     public void makeVisable() {
@@ -176,5 +221,31 @@ public class UI {
 
     public JTextArea getLogtextarea() {
         return this.logtextarea;
+    }
+
+    /**
+     * When the worker needs to update the GUI we do so by queuing
+     * a Runnable for the event dispatching thread with
+     * SwingUtilities.invokeLater().  In this case we're just
+     * changing the progress bars value.
+     * @param currentChunk  The progress bar value.
+     */
+    public void updateCurrentChunk(final int currentChunk) {
+        Runnable doSetProgressBarValue =
+            new Runnable() {
+                public void run() {
+                    progressBar.setValue(currentChunk);
+                }
+            };
+
+        SwingUtilities.invokeLater(doSetProgressBarValue);
+    }
+
+    /**
+     * Sets the number of chunks to be submitted.
+     * @param numberOfChunks  The number of chunks to be submitted.
+     */
+    public void setNumberOfChunks(final int numberOfChunks) {
+        progressBar.setMaximum(numberOfChunks);
     }
 }

@@ -170,7 +170,7 @@ public class Scrobbler {
         logger.log(Level.INFO, "Handshake completed");
     }
 
-    public void submitTracks(final List recentPlayed)
+    public void submitTracks(final List recentPlayed, ChunkProgress chunkProgress)
             throws UnsupportedEncodingException, NoSuchAlgorithmException, MalformedURLException,
                 IOException, FailedLoginException {
         logger.log(Level.INFO, "Submitting tracks...");
@@ -190,6 +190,8 @@ public class Scrobbler {
          * Last.fm individually, per their guidelines.
          */
         List chunks = ChunkUtil.createChunks(recentPlayed, MAX_TRACKS_PER_CHUNK);
+
+        chunkProgress.setNumberOfChunks(chunks.size());
 
         Chunk chunk = null;
 
@@ -249,6 +251,8 @@ public class Scrobbler {
             if ((lines[0].length() >= 2) && !lines[0].substring(0, 2).equals("OK")) {
                 throw new RuntimeException("Unknown error submitting tracks");
             }
+
+            chunkProgress.updateCurrentChunk(i + 1);
         }
 
         logger.log(Level.INFO, "Tracks submitted");
