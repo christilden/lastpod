@@ -64,6 +64,8 @@ public class LastPod {
     public static void ParsePlayCounts() {
         Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
         String iTunesPath = fPrefs.get("iTunes Path", "default");
+        String parseVariousArtistsStr = fPrefs.get("parseVariousArtists", "1");
+        boolean parseVariousArtists = parseVariousArtistsStr.equals("1") ? true : false;
 
         if (iTunesPath.equals("default")) {
             logger.log(Level.INFO, LastPod.NO_PREFS_ERROR);
@@ -71,7 +73,7 @@ public class LastPod {
             return;
         }
 
-        DbReader reader = new DbReader(iTunesPath);
+        DbReader reader = new DbReader(iTunesPath, parseVariousArtists);
 
         try {
             reader.parse();

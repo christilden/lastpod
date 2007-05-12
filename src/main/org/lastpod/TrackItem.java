@@ -33,6 +33,7 @@ public class TrackItem implements Comparable {
     private String track;
     private long playcount;
     private long lastplayed;
+    private boolean parseVariousArtists;
 
     /**
      * Default constructor
@@ -81,10 +82,36 @@ public class TrackItem implements Comparable {
     }
 
     /**
+     * Gets the artist of this track.
      * @return Returns the artist.
      */
     public String getArtist() {
+        /* If required parse the track String to obtain the proper artist. */
+        if (isVariousArtistAlbum(parseVariousArtists)) {
+            return track.split("-")[0].trim();
+        }
+
         return artist;
+    }
+
+    /**
+     * Returns <code>true</code> if this track belongs to a "Various Artist"
+     * album.
+     * @param parseVariousArtists  <code>true</code> Will cause the track to be
+     * checked to see if it is a "Various Artist" track.  If so, the artist
+     * information will be parsed from the track title.
+     * @return  <code>true</code> if this is a "Various Artist" album.
+     */
+    public boolean isVariousArtistAlbum(boolean parseVariousArtists) {
+        /* Returns false if "Various Artist" tracks should not be parsed. */
+        if (!parseVariousArtists) {
+            return false;
+        }
+
+        /* In addition to other checks, this makes sure the track is not null,
+         * because track will need to be parsed. */
+        return (track != null) && (artist != null)
+        && artist.trim().toLowerCase().equals("various artists");
     }
 
     /**
@@ -137,9 +164,15 @@ public class TrackItem implements Comparable {
     }
 
     /**
+     * Gets the track name of the track.
      * @return Returns the track.
      */
     public String getTrack() {
+        /* If required parse the track String to obtain the proper track. */
+        if (isVariousArtistAlbum(parseVariousArtists)) {
+            return track.split("-")[1].trim();
+        }
+
         return track;
     }
 
@@ -164,6 +197,27 @@ public class TrackItem implements Comparable {
         this.trackid = trackid;
     }
 
+    /**
+     * Returns <code>true</code> if the track should be parsed for "Various
+     * Artists".
+     * @return  Returns <code>true</code> if the track should be parsed for
+     * "Various Artists".
+     */
+    public boolean isParseVariousArtists() {
+        return parseVariousArtists;
+    }
+
+    /**
+     * Set this to <code>true</code> if the track should be parsed for "Various
+     * Artists".
+     * @param parseVariousArtists  <code>true</code> Will cause the track to be
+     * checked to see if it is a "Various Artist" track.  If so, the artist
+     * information will be parsed from the track title.
+     */
+    public void setParseVariousArtists(boolean parseVariousArtists) {
+        this.parseVariousArtists = parseVariousArtists;
+    }
+
     public int compareTo(Object trackItem) {
         TrackItem temptrack = (TrackItem) trackItem;
 
@@ -181,9 +235,9 @@ public class TrackItem implements Comparable {
 
         tempstring = "Track ID: " + trackid + "\n";
         tempstring += ("Length: " + length + "\n");
-        tempstring += ("Artist: " + artist + "\n");
+        tempstring += ("Artist: " + getArtist() + "\n");
         tempstring += ("Album: " + album + "\n");
-        tempstring += ("Track: " + track + "\n");
+        tempstring += ("Track: " + getTrack() + "\n");
         tempstring += ("Play Count: " + playcount + "\n");
         tempstring += ("Last Played: " + new Date(lastplayed * 1000) + "\n");
 

@@ -53,7 +53,8 @@ import javax.swing.border.TitledBorder;
 
 /**
  * @author Muti
- * @version $Id$
+ * @version $Id: /lastpod/local/src/main/org/lastpod/PreferencesEditor.java 7692
+ *          2007-05-07T05:45:17.332896Z chris $
  */
 public class PreferencesEditor {
     private Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
@@ -64,6 +65,7 @@ public class PreferencesEditor {
     private JPasswordField passfield;
     private JTextField dbfield;
     private JTextField backupUrlField;
+    private JCheckBox parseVariousArtistsCheck;
     private JTextField iTunesfield;
     private JCheckBox iTCheck;
     private JLabel iTunesStatus;
@@ -219,9 +221,15 @@ public class PreferencesEditor {
         p3.setBorder(b3);
 
         String toolTip =
-            "<html>If a URL is entered the play information will be"
-            + " submitted to both Last.fm and the given URL.  This allows one"
-            + " to perform a backup of the Last.fm data.";
+            "<html>If a URL is entered the play information will be<br>"
+            + " submitted to both Last.fm and the given URL.  This allows one<br>"
+            + " to perform a backup of the Last.fm data.<br><br>"
+            + " If the parse option is checked then LastPod will parse the track<br>"
+            + " information when the artist is \"Various Artists\".  The<br>"
+            + " parsing consists of spliting the artist and track from the<br>"
+            + "orgininal track String.  (For example, \"Bing Crosby - <br>"
+            + "I'll Be Home for Christmas\" becomes artist=Bing Crosby<br>"
+            + "and track name=I'll Be Home for Christmas.";
         p3.setToolTipText(toolTip);
 
         JLabel backupUrlLabel = new JLabel("Backup URL: ");
@@ -229,7 +237,21 @@ public class PreferencesEditor {
         backupUrlField = new JTextField();
         p3.add(backupUrlField);
 
-        SpringUtilities.makeCompactGrid(p3, 1, 2, 5, 2, 3, 4);
+        JLabel parseVariousArtistsLabel = new JLabel("Parse \"Various Artists\" Tracks: ");
+        p3.add(parseVariousArtistsLabel);
+        parseVariousArtistsCheck = new JCheckBox();
+        parseVariousArtistsCheck.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (parseVariousArtistsCheck.isSelected()) {
+                        parseVariousArtistsCheck.setText("Enabled");
+                    } else {
+                        parseVariousArtistsCheck.setText("Disabled");
+                    }
+                }
+            });
+        p3.add(parseVariousArtistsCheck);
+
+        SpringUtilities.makeCompactGrid(p3, 2, 2, 5, 2, 3, 4);
         p.add(p3);
 
         JPanel p5 = new JPanel();
@@ -329,6 +351,14 @@ public class PreferencesEditor {
             this.iTunesfield.setEditable(false);
             this.browsebuttoniTunes.setEnabled(false);
         }
+
+        if (fPrefs.get("parseVariousArtists", "1").equals("1")) {
+            parseVariousArtistsCheck.setText("Enabled");
+            parseVariousArtistsCheck.setSelected(true);
+        } else {
+            parseVariousArtistsCheck.setText("Disabled");
+            parseVariousArtistsCheck.setSelected(false);
+        }
     }
 
     private void savePreferences() {
@@ -344,10 +374,14 @@ public class PreferencesEditor {
             fPrefs.put("encryptedPassword", encryptedPassword);
         }
 
+        boolean selected = parseVariousArtistsCheck.isSelected();
+        String parseVariousArtists = selected ? "1" : "0";
+
         fPrefs.put("iTunes Path", newItunesPath);
         fPrefs.put("backupUrl", this.backupUrlField.getText());
         fPrefs.put("iT Path", this.iTunesfield.getText());
         fPrefs.put("iTunes Status", this.iTunesStatus.getText());
+        fPrefs.put("parseVariousArtists", parseVariousArtists);
 
         try {
             fPrefs.flush();

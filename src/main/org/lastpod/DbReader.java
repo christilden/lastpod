@@ -62,6 +62,11 @@ public class DbReader {
     private ArrayList tracklist;
 
     /**
+     * Stores a boolean value that will be passed into <code>TrackItem</code>
+     */
+    boolean parseVariousArtists;
+
+    /**
      * A list of the recently played tracks from the iPod play counts file.
      * (Sorted by play time. This is important because otherwise Last.fm will
      * reject them.)
@@ -81,7 +86,7 @@ public class DbReader {
      * @param itunespath  Directory containing the iTunesDB and the corresponding
      *                         Play Counts, including trailing "\" or "/".
      */
-    public DbReader(String itunespath) {
+    public DbReader(String itunespath, boolean parseVariousArtists) {
         if (!itunespath.endsWith(File.separator)) {
             itunespath += File.separator;
         }
@@ -90,6 +95,7 @@ public class DbReader {
         this.playcountsfile = itunespath + "Play Counts";
         this.tracklist = new ArrayList();
         this.recentplays = new ArrayList();
+        this.parseVariousArtists = parseVariousArtists;
     }
 
     /**
@@ -165,6 +171,7 @@ public class DbReader {
     public TrackItem parsemhit() throws IOException {
         byte[] dword = new byte[4];
         TrackItem track = new TrackItem();
+        track.setParseVariousArtists(parseVariousArtists);
 
         this.itunesistream.mark(1048576); //mark beginning of MHIT location
 
