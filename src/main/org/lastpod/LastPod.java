@@ -47,7 +47,11 @@ public class LastPod {
         + "your iTunesDB (it's on your iPod's drive) and your AudioScrobbler "
         + "username and password.";
 
-    private static void Load() {
+    /**
+     * Loads the recent played information from the iPod and constructs the
+     * GUI to display it.
+     */
+    private static void load() {
         LastPod.recentplayed = new ArrayList();
         LastPod.UI = new UI();
         LastPod.UI.buildUI();
@@ -56,12 +60,15 @@ public class LastPod {
         logger.setLevel(Level.ALL);
         logger.addHandler(new LogHandler());
 
-        LastPod.ParsePlayCounts();
+        LastPod.parsePlayCounts();
 
         LastPod.UI.makeVisable();
     }
 
-    public static void ParsePlayCounts() {
+    /**
+     * Parses the play counts and track information from the iPod.
+     */
+    public static void parsePlayCounts() {
         Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
         String iTunesPath = fPrefs.get("iTunes Path", "default");
         String parseVariousArtistsStr = fPrefs.get("parseVariousArtists", "1");
@@ -92,7 +99,11 @@ public class LastPod {
         }
     }
 
-    public static Object SubmitTracks() {
+    /**
+     * Submits the tracks to Last.fm
+     * @return  A status message upon completion.
+     */
+    public static Object submitTracks() {
         Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
         String username = fPrefs.get("Username", "default");
         String password = fPrefs.get("Password", "default");
@@ -193,7 +204,7 @@ public class LastPod {
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    LastPod.Load();
+                    LastPod.load();
                 }
             });
     }

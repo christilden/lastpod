@@ -395,7 +395,7 @@ public class PreferencesEditor {
          */
         if (!oldItunesPath.equals(newItunesPath)) {
             LastPod.recentplayed = new ArrayList();
-            LastPod.ParsePlayCounts();
+            LastPod.parsePlayCounts();
             LastPod.UI.newTrackListAvailable();
         }
     }

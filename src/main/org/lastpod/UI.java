@@ -193,7 +193,7 @@ public class UI implements ChunkProgress {
                     worker =
                         new SwingWorker() {
                                 public Object construct() {
-                                    return LastPod.SubmitTracks();
+                                    return LastPod.submitTracks();
                                 }
 
                                 public void finished() {
