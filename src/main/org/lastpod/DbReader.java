@@ -69,6 +69,13 @@ public class DbReader {
     private ArrayList recentplays;
 
     /**
+     * Default constructor should not be used.
+     */
+    private DbReader() {
+        /* Default constructor. */
+    }
+
+    /**
      * Initializes the class with the locations of the iPod DB files.
      *
      * @param itunespath  Directory containing the iTunesDB and the corresponding
