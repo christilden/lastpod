@@ -219,6 +219,8 @@ public class Scrobbler {
 
                 queryString += buildTrackQueryString(track, tracknum);
 
+                /* Unselect the submitted track. */
+                track.setActive(Boolean.FALSE);
                 tracknum++;
             }
 

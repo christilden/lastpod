@@ -131,8 +131,7 @@ public class LastPod {
             LastPod.scrobbler.submitTracks(activeRecentPlayed, LastPod.UI);
             LastPod.scrobbler.addHistories(activeRecentPlayed, inactiveRecentPlayed);
 
-            /* Clear recent track list. */
-            LastPod.recentplayed = inactiveRecentPlayed;
+            /* Refresh track list. */
             LastPod.UI.newTrackListAvailable();
         } catch (Exception e) {
             StackTraceElement[] trace = e.getStackTrace();
