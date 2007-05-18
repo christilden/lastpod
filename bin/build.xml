@@ -111,6 +111,9 @@
     </javac>
 
     <copy file="${src.home}/../COPYING" todir="${bin.home}/org/lastpod"/>
+    <copy todir="${bin.home}/org/lastpod/images">
+        <fileset dir="${src.home}/../images"/>
+    </copy>
   </target>
 
   <target name="test" depends="prepare,compile,run-debug"

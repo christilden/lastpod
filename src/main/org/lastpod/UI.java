@@ -18,14 +18,18 @@
  */
 package org.lastpod;
 
-import org.lastpod.util.SwingWorker;
+import org.lastpod.action.ExitApplication;
+import org.lastpod.action.OpenPreferencesEditor;
+import org.lastpod.action.SubmitTracks;
+import org.lastpod.action.UnselectAll;
+
+import org.lastpod.util.SwingUtils;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -34,11 +38,19 @@ import java.io.IOException;
 
 import java.util.prefs.Preferences;
 
+import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
 /**
@@ -53,21 +65,62 @@ public class UI implements ChunkProgress {
     private JTextArea logtextarea;
 
     /**
-     * The submit button.
-     */
-    private JButton submitButton;
-
-    /**
      * Displays the progress of the submit.
      */
     private JProgressBar progressBar = null;
 
     /**
-     * This worker is used to perform the submission and is a nice threaded
-     * implementation.
+     * The label used to display the idle and busy icons.
      */
-    private SwingWorker worker;
+    private JLabel statusAnimationLabel;
     private JFrame frame;
+
+    /**
+     * The action that opens the PreferencesEditor.
+     */
+    private final Action actionOpenPreferences;
+
+    /**
+     * The action that unselects all tracks.
+     */
+    private final Action actionUnselectAll;
+
+    /**
+     * The action that submits tracks to Last.fm.
+     */
+    private final Action actionSubmitTracks;
+
+    /**
+     * The action that exits the application.
+     */
+    private final Action actionExit;
+
+    /**
+     * Constructs the user interface and some icon elements.
+     */
+    public UI() {
+        frame = new JFrame("LastPod");
+
+        ImageIcon idleIcon = SwingUtils.createImageIcon(UI.class, "images/busyicons/idle-icon.png");
+        statusAnimationLabel = new JLabel();
+        statusAnimationLabel.setIcon(idleIcon);
+
+        ImageIcon iconOpenPreferences =
+            SwingUtils.createImageIcon(UI.class, "images/preferences-desktop.png");
+        ImageIcon iconUnselectAll = SwingUtils.createImageIcon(UI.class, "images/stock_to-top.png");
+        ImageIcon iconSubmitTracks =
+            SwingUtils.createImageIcon(UI.class, "images/applications-system.png");
+        ImageIcon iconExit = SwingUtils.createImageIcon(UI.class, "images/application-exit.png");
+
+        actionOpenPreferences = new OpenPreferencesEditor(frame, "Preferences",
+                iconOpenPreferences, "Opens Preferences Editor", KeyEvent.VK_P);
+        actionUnselectAll = new UnselectAll(frame, "Unselect All", iconUnselectAll,
+                "Unselects All Tracks", KeyEvent.VK_A);
+        actionSubmitTracks = new SubmitTracks(statusAnimationLabel, "Submit Tracks",
+                iconSubmitTracks, "Submits the selected tracks to Last.fm", KeyEvent.VK_S);
+        actionExit = new ExitApplication("Exit", iconExit,
+                "Exits the application.  May launch iTunes", KeyEvent.VK_X);
+    }
 
     /**
      * Gets the user interface's JFrame.
@@ -79,29 +132,11 @@ public class UI implements ChunkProgress {
 
     public void buildUI() {
         JFrame.setDefaultLookAndFeelDecorated(true);
-        frame = new JFrame("LastPod");
 
         /* If enabled launch iTunes after exiting the application. */
         frame.addWindowListener(new WindowAdapter() {
                 public void windowClosing(WindowEvent windowEvent) {
-                    Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
-                    String iTunesStatus = fPrefs.get("iTunes Status", "Disabled");
-
-                    if (iTunesStatus.equals("Enabled")) {
-                        String iTunesPath = fPrefs.get("iT Path", "default");
-
-                        if (!iTunesPath.endsWith("iTunes.exe")) {
-                            iTunesPath += "\\iTunes.exe";
-                        }
-
-                        try {
-                            Runtime rt = Runtime.getRuntime();
-                            rt.exec(iTunesPath);
-                        } catch (IOException e) {
-                            System.out.println(iTunesPath + " not found!  Cannot launch iTunes.");
-                        }
-                    }
-
+                    launchItunes();
                     System.exit(0);
                 }
             });
@@ -122,6 +157,53 @@ public class UI implements ChunkProgress {
         frame.getContentPane().setLayout(layout);
 
         GridBagConstraints c = new GridBagConstraints();
+
+        JMenuBar menuBar = new JMenuBar();
+        JMenu optionsMenu = new JMenu("Options");
+        optionsMenu.setMnemonic(KeyEvent.VK_O);
+
+        JMenu editMenu = new JMenu("Edit");
+        editMenu.setMnemonic(KeyEvent.VK_E);
+
+        optionsMenu.add(new JMenuItem(actionOpenPreferences));
+        optionsMenu.addSeparator();
+        optionsMenu.add(new JMenuItem(actionExit));
+
+        editMenu.add(new JMenuItem(actionUnselectAll));
+
+        menuBar.add(optionsMenu);
+        menuBar.add(editMenu);
+        frame.setJMenuBar(menuBar);
+
+        JToolBar toolBar = new JToolBar();
+        layout.setConstraints(toolBar, c);
+
+        JButton button;
+        button = new JButton(actionOpenPreferences);
+        layout.setConstraints(button, c);
+        toolBar.add(button);
+
+        toolBar.addSeparator();
+
+        button = new JButton(actionUnselectAll);
+        layout.setConstraints(button, c);
+        toolBar.add(button);
+
+        toolBar.addSeparator();
+
+        button = new JButton(actionSubmitTracks);
+        layout.setConstraints(button, c);
+        toolBar.add(button);
+
+        toolBar.addSeparator();
+
+        button = new JButton(actionExit);
+        layout.setConstraints(button, c);
+        toolBar.add(button);
+
+        frame.getContentPane().add(toolBar);
+
+        c.gridy = 1;
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 1.0;
         c.weighty = 1.0;
@@ -131,6 +213,7 @@ public class UI implements ChunkProgress {
         layout.setConstraints(this.recentpanel, c);
         frame.getContentPane().add(this.recentpanel);
 
+        c.gridy = 2;
         c.weighty = 0.5;
         this.logtextarea = new JTextArea("=====LOG=====\n");
         this.logtextarea.setLineWrap(true);
@@ -145,70 +228,29 @@ public class UI implements ChunkProgress {
         c.weightx = 0.0;
         c.weighty = 0.0;
 
-        //TODO Add button mnemonics for kbd shortcut access
-        JButton button;
-        button = new JButton("Preferences..");
-        button.setMnemonic(KeyEvent.VK_P);
-        button.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent ev) {
-                    PreferencesEditor prefeditor = new PreferencesEditor(frame);
-                    prefeditor.buildUI();
-                }
-            });
-        layout.setConstraints(button, c);
-        frame.getContentPane().add(button);
+        c.fill = GridBagConstraints.NONE;
+        c.gridx = 2;
+        c.gridy = 3;
+        c.anchor = GridBagConstraints.LAST_LINE_END;
 
-        button = new JButton("Unselect All");
-        button.setMnemonic(KeyEvent.VK_A);
-        button.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent ev) {
-                    JButton selectionButton = (JButton) ev.getSource();
-
-                    if ("Unselect All".equals(selectionButton.getText())) {
-                        LastPod.unselectAll();
-                        selectionButton.setText("Select All");
-                    } else if ("Select All".equals(selectionButton.getText())) {
-                        LastPod.selectAll();
-                        selectionButton.setText("Unselect All");
-                    }
-
-                    frame.repaint();
-                }
-            });
-        layout.setConstraints(button, c);
-        frame.getContentPane().add(button);
-
-        submitButton = new JButton("Submit Tracks");
-        submitButton.setMnemonic(KeyEvent.VK_S);
-        submitButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent ev) {
-                    submitButton.setEnabled(false);
-
-                    /* Invoking start() on the SwingWorker causes a new Thread
-                     * to be created that will call construct(), and then
-                     * finished().  Note that finished() is called even if
-                     * the worker is interrupted because we catch the
-                     * InterruptedException in doWork().
-                     */
-                    worker =
-                        new SwingWorker() {
-                                public Object construct() {
-                                    return LastPod.submitTracks();
-                                }
-
-                                public void finished() {
-                                    submitButton.setEnabled(true);
-                                }
-                            };
-                    worker.start();
-                }
-            });
-        layout.setConstraints(submitButton, c);
-        frame.getContentPane().add(submitButton);
+        JPanel statusBar = new JPanel();
+        statusBar.setLayout(layout);
+        layout.setConstraints(statusBar, c);
 
         progressBar = new JProgressBar();
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.insets = new Insets(3, 10, 3, 5);
         layout.setConstraints(progressBar, c);
-        frame.getContentPane().add(progressBar);
+        statusBar.add(progressBar);
+
+        c.gridx = 1;
+        c.insets = new Insets(3, 0, 3, 4);
+        layout.setConstraints(statusAnimationLabel, c);
+        statusBar.add(statusAnimationLabel);
+
+        frame.getContentPane().add(statusBar);
     }
 
     public void makeVisable() {
@@ -247,5 +289,28 @@ public class UI implements ChunkProgress {
      */
     public void setNumberOfChunks(final int numberOfChunks) {
         progressBar.setMaximum(numberOfChunks);
+    }
+
+    /**
+     * Launches iTunes if the user has specified this in their preferences.
+     */
+    private void launchItunes() {
+        Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
+        String iTunesStatus = fPrefs.get("iTunes Status", "Disabled");
+
+        if (iTunesStatus.equals("Enabled")) {
+            String iTunesPath = fPrefs.get("iT Path", "default");
+
+            if (!iTunesPath.endsWith("iTunes.exe")) {
+                iTunesPath += "\\iTunes.exe";
+            }
+
+            try {
+                Runtime rt = Runtime.getRuntime();
+                rt.exec(iTunesPath);
+            } catch (IOException e) {
+                System.out.println(iTunesPath + " not found!  Cannot launch iTunes.");
+            }
+        }
     }
 }
