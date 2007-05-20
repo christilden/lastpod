@@ -63,11 +63,21 @@ public class History {
     /**
      * Singleton that reads the history file and creates this
      * <code>History</code> object.
+     * @param iTunesPath  The path to the iPod's iTunes DB.  LastPod's history
+     * data will be stored there.
      * @return  This <code>History</code> object with a List of histories.
      */
-    public static History getInstance() {
+    public static History getInstance(String iTunesPath) {
         if (_instance == null) {
-            _instance = new History(new File(URL));
+            if (iTunesPath == null) {
+                throw new RuntimeException("iTunes path was not supplied.");
+            }
+
+            if (!iTunesPath.endsWith(File.separator)) {
+                iTunesPath += File.separator;
+            }
+
+            _instance = new History(new File(iTunesPath + URL));
             _instance.read();
         }
 

@@ -37,6 +37,11 @@ import java.util.Collections;
  */
 public class DbReader {
     /**
+     * The location of the iTunes path.
+     */
+    private String iTunesPath;
+
+    /**
      * The location of the iTunes database file.
      */
     private String itunesfile;
@@ -91,6 +96,7 @@ public class DbReader {
             itunespath += File.separator;
         }
 
+        this.iTunesPath = itunespath;
         this.itunesfile = itunespath + "iTunesDB";
         this.playcountsfile = itunespath + "Play Counts";
         this.tracklist = new ArrayList();
@@ -296,7 +302,7 @@ public class DbReader {
                 temptrack.setPlaycount(playcount);
                 temptrack.setLastplayed(lastplayed - temptrack.getLength());
 
-                if (History.getInstance().isInHistory(temptrack.getLastplayed())) {
+                if (History.getInstance(iTunesPath).isInHistory(temptrack.getLastplayed())) {
                     temptrack.setActive(Boolean.FALSE);
                 }
 

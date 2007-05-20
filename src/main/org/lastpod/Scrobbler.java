@@ -328,18 +328,18 @@ public class Scrobbler {
     public void addHistories(List activeRecentPlayed, List inactiveRecentPlayed) {
         for (int i = 0; i < activeRecentPlayed.size(); i++) {
             TrackItem track = (TrackItem) activeRecentPlayed.get(i);
-            History.getInstance().addhistory(track.getLastplayed());
+            History.getInstance(null).addhistory(track.getLastplayed());
         }
 
         for (int i = 0; i < inactiveRecentPlayed.size(); i++) {
             TrackItem track = (TrackItem) inactiveRecentPlayed.get(i);
 
-            if (History.getInstance().isInHistory(track.getLastplayed())) {
-                History.getInstance().addhistory(track.getLastplayed());
+            if (History.getInstance(null).isInHistory(track.getLastplayed())) {
+                History.getInstance(null).addhistory(track.getLastplayed());
             }
         }
 
-        History.getInstance().write();
+        History.getInstance(null).write();
     }
 
     /**
