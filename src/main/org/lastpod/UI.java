@@ -18,6 +18,7 @@
  */
 package org.lastpod;
 
+import org.lastpod.action.DeletePlayCounts;
 import org.lastpod.action.ExitApplication;
 import org.lastpod.action.OpenPreferencesEditor;
 import org.lastpod.action.SubmitTracks;
@@ -87,6 +88,11 @@ public class UI implements ChunkProgress {
     private final Action actionSubmitTracks;
 
     /**
+     * The action that deletes the iPod's play counts file.
+     */
+    private final Action actionDeletePlayCounts;
+
+    /**
      * The action that exits the application.
      */
     private final Action actionExit;
@@ -106,6 +112,8 @@ public class UI implements ChunkProgress {
         ImageIcon iconUnselectAll = SwingUtils.createImageIcon(UI.class, "images/stock_to-top.png");
         ImageIcon iconSubmitTracks =
             SwingUtils.createImageIcon(UI.class, "images/applications-system.png");
+        ImageIcon iconDeletePlayCounts =
+            SwingUtils.createImageIcon(UI.class, "images/stock_data-delete-table.png");
         ImageIcon iconExit = SwingUtils.createImageIcon(UI.class, "images/application-exit.png");
 
         actionOpenPreferences = new OpenPreferencesEditor(frame, "Preferences",
@@ -114,6 +122,8 @@ public class UI implements ChunkProgress {
                 "Unselects All Tracks", KeyEvent.VK_A);
         actionSubmitTracks = new SubmitTracks(statusAnimationLabel, "Submit Tracks",
                 iconSubmitTracks, "Submits the selected tracks to Last.fm", KeyEvent.VK_S);
+        actionDeletePlayCounts = new DeletePlayCounts(frame, "Delete Play Counts",
+                iconDeletePlayCounts, "Removes the play counts file from the iPod.", KeyEvent.VK_D);
         actionExit = new ExitApplication(frame, "Exit", iconExit,
                 "Exits the application.  May launch iTunes", KeyEvent.VK_X);
     }
@@ -165,6 +175,8 @@ public class UI implements ChunkProgress {
         optionsMenu.add(new JMenuItem(actionExit));
 
         editMenu.add(new JMenuItem(actionUnselectAll));
+        editMenu.addSeparator();
+        editMenu.add(new JMenuItem(actionDeletePlayCounts));
 
         menuBar.add(optionsMenu);
         menuBar.add(editMenu);
@@ -187,6 +199,12 @@ public class UI implements ChunkProgress {
         toolBar.addSeparator();
 
         button = new JButton(actionSubmitTracks);
+        layout.setConstraints(button, c);
+        toolBar.add(button);
+
+        toolBar.addSeparator();
+
+        button = new JButton(actionDeletePlayCounts);
         layout.setConstraints(button, c);
         toolBar.add(button);
 
