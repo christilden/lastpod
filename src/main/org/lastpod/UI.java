@@ -34,10 +34,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import java.io.IOException;
-
-import java.util.prefs.Preferences;
-
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -136,8 +132,7 @@ public class UI implements ChunkProgress {
         /* If enabled launch iTunes after exiting the application. */
         frame.addWindowListener(new WindowAdapter() {
                 public void windowClosing(WindowEvent windowEvent) {
-                    launchItunes();
-                    System.exit(0);
+                    actionExit.actionPerformed(null);
                 }
             });
 
@@ -289,28 +284,5 @@ public class UI implements ChunkProgress {
      */
     public void setNumberOfChunks(final int numberOfChunks) {
         progressBar.setMaximum(numberOfChunks);
-    }
-
-    /**
-     * Launches iTunes if the user has specified this in their preferences.
-     */
-    private void launchItunes() {
-        Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
-        String iTunesStatus = fPrefs.get("iTunes Status", "Disabled");
-
-        if (iTunesStatus.equals("Enabled")) {
-            String iTunesPath = fPrefs.get("iT Path", "default");
-
-            if (!iTunesPath.endsWith("iTunes.exe")) {
-                iTunesPath += "\\iTunes.exe";
-            }
-
-            try {
-                Runtime rt = Runtime.getRuntime();
-                rt.exec(iTunesPath);
-            } catch (IOException e) {
-                System.out.println(iTunesPath + " not found!  Cannot launch iTunes.");
-            }
-        }
     }
 }

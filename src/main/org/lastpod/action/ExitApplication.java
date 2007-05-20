@@ -46,8 +46,6 @@ public class ExitApplication extends AbstractAction {
     /**
      * Launches iTunes if the user has specified this in their preferences.
      */
-
-    //TODO: This method is also in UI.java, remove one.
     private void launchItunes() {
         Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
         String iTunesStatus = fPrefs.get("iTunes Status", "Disabled");
