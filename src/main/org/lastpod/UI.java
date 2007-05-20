@@ -233,10 +233,11 @@ public class UI implements ChunkProgress {
         layout.setConstraints(statusBar, c);
 
         progressBar = new JProgressBar();
+        progressBar.setMinimumSize(new Dimension(150, 0));
 
         c.gridx = 0;
         c.gridy = 0;
-        c.insets = new Insets(3, 10, 3, 5);
+        c.insets = new Insets(3, 10, 4, 5);
         layout.setConstraints(progressBar, c);
         statusBar.add(progressBar);
 
