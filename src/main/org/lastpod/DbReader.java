@@ -109,7 +109,7 @@ public class DbReader {
      * @return Returns recent plays.
      */
     public ArrayList getRecentplays() {
-        return this.recentplays;
+        return recentplays;
     }
 
     /**
@@ -119,15 +119,15 @@ public class DbReader {
      */
     public void parse() throws IOException {
         try {
-            FileInputStream itstream = new FileInputStream(this.itunesfile);
-            this.itunesistream = new BufferedInputStream(itstream, 65535);
+            FileInputStream itstream = new FileInputStream(itunesfile);
+            itunesistream = new BufferedInputStream(itstream, 65535);
         } catch (IOException e) {
             throw new IOException("Error reading iTunes Database");
         }
 
         try {
-            FileInputStream pcstream = new FileInputStream(this.playcountsfile);
-            this.playcountsistream = new BufferedInputStream(pcstream, 65535);
+            FileInputStream pcstream = new FileInputStream(playcountsfile);
+            playcountsistream = new BufferedInputStream(pcstream, 65535);
         } catch (IOException e) {
             String errorMsg =
                 "Error reading Play Counts Database.\n"
@@ -137,11 +137,11 @@ public class DbReader {
             throw new IOException(errorMsg);
         }
 
-        this.parseitunesdb();
-        this.parseplaycounts();
+        parseitunesdb();
+        parseplaycounts();
 
-        this.itunesistream.close();
-        this.playcountsistream.close();
+        itunesistream.close();
+        playcountsistream.close();
     }
 
     /**
@@ -152,16 +152,16 @@ public class DbReader {
         byte[] buf = new byte[1];
 
         //we seek one at a time because the mhit marker won't always be at a multiple of four
-        while (this.itunesistream.read(buf) != -1) {
+        while (itunesistream.read(buf) != -1) {
             if (buf[0] == 'm') { //Search for MHIT
-                this.itunesistream.mark(1048576);
+                itunesistream.mark(1048576);
                 buf = new byte[3];
-                this.itunesistream.read(buf);
+                itunesistream.read(buf);
 
                 if (new String(buf).equals("hit")) {
-                    this.tracklist.add(this.parsemhit());
+                    tracklist.add(parsemhit());
                 } else {
-                    this.itunesistream.reset();
+                    itunesistream.reset();
                 }
             }
 
@@ -179,29 +179,29 @@ public class DbReader {
         TrackItem track = new TrackItem();
         track.setParseVariousArtists(parseVariousArtists);
 
-        this.itunesistream.mark(1048576); //mark beginning of MHIT location
+        itunesistream.mark(1048576); //mark beginning of MHIT location
 
-        this.itunesistream.read(dword);
+        itunesistream.read(dword);
 
         long headersize = DbReader.littleEndianToBigInt(dword).longValue();
 
-        DbReader.skipFully(this.itunesistream, 4);
-        this.itunesistream.read(dword);
+        DbReader.skipFully(itunesistream, 4);
+        itunesistream.read(dword);
 
         long nummhods = DbReader.littleEndianToBigInt(dword).longValue();
 
-        this.itunesistream.read(dword);
+        itunesistream.read(dword);
         track.setTrackid(DbReader.littleEndianToBigInt(dword).longValue());
 
-        DbReader.skipFully(this.itunesistream, 20);
-        this.itunesistream.read(dword);
+        DbReader.skipFully(itunesistream, 20);
+        itunesistream.read(dword);
         track.setLength(DbReader.littleEndianToBigInt(dword).longValue() / 1000);
 
-        this.itunesistream.reset();
-        DbReader.skipFully(this.itunesistream, headersize - 4); //skip to end of MHIT
+        itunesistream.reset();
+        DbReader.skipFully(itunesistream, headersize - 4); //skip to end of MHIT
 
         for (long i = 0; i < nummhods; i++) {
-            this.parsemhod(track);
+            parsemhod(track);
         }
 
         return track;
@@ -215,28 +215,28 @@ public class DbReader {
     public void parsemhod(TrackItem track) throws IOException {
         byte[] dword = new byte[4];
 
-        this.itunesistream.mark(1048576); //mark beginning of MHOD location
+        itunesistream.mark(1048576); //mark beginning of MHOD location
 
-        DbReader.skipFully(this.itunesistream, 8);
+        DbReader.skipFully(itunesistream, 8);
 
-        this.itunesistream.read(dword);
+        itunesistream.read(dword);
 
         long totalsize = DbReader.littleEndianToBigInt(dword).longValue();
 
-        this.itunesistream.read(dword);
+        itunesistream.read(dword);
 
         int mhodtype = DbReader.littleEndianToBigInt(dword).intValue();
 
         if ((mhodtype == 1) || (mhodtype == 3) || (mhodtype == 4)) {
-            DbReader.skipFully(this.itunesistream, 12);
-            this.itunesistream.read(dword);
+            DbReader.skipFully(itunesistream, 12);
+            itunesistream.read(dword);
 
             int strlen = DbReader.littleEndianToBigInt(dword).intValue();
 
-            DbReader.skipFully(this.itunesistream, 8);
+            DbReader.skipFully(itunesistream, 8);
 
             byte[] data = new byte[strlen];
-            this.itunesistream.read(data);
+            itunesistream.read(data);
 
             String stringdata = new String(data, "UTF-16LE");
 
@@ -258,8 +258,8 @@ public class DbReader {
             }
         }
 
-        this.itunesistream.reset();
-        DbReader.skipFully(this.itunesistream, totalsize);
+        itunesistream.reset();
+        DbReader.skipFully(itunesistream, totalsize);
     }
 
     /**
@@ -269,26 +269,26 @@ public class DbReader {
     public void parseplaycounts() throws IOException {
         byte[] dword = new byte[4];
 
-        DbReader.skipFully(this.playcountsistream, 8);
-        this.playcountsistream.read(dword);
+        DbReader.skipFully(playcountsistream, 8);
+        playcountsistream.read(dword);
 
         long entrylen = DbReader.littleEndianToBigInt(dword).longValue();
 
-        this.playcountsistream.read(dword);
+        playcountsistream.read(dword);
 
         int numentries = DbReader.littleEndianToBigInt(dword).intValue();
 
-        DbReader.skipFully(this.playcountsistream, 80); //skip rest of header
+        DbReader.skipFully(playcountsistream, 80); //skip rest of header
 
         for (int i = 0; i < (numentries - 1); i++) {
-            this.playcountsistream.mark(1048576); //save beginning of entry location
+            playcountsistream.mark(1048576); //save beginning of entry location
 
-            this.playcountsistream.read(dword);
+            playcountsistream.read(dword);
 
             long playcount = DbReader.littleEndianToBigInt(dword).longValue();
 
             if (playcount > 0) {
-                this.playcountsistream.read(dword);
+                playcountsistream.read(dword);
 
                 long lastplayed = DbReader.littleEndianToBigInt(dword).longValue();
                 lastplayed -= 2082844800; //convert to UNIX timestamp
@@ -298,7 +298,7 @@ public class DbReader {
                     calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
                 lastplayed -= (offset / 1000);
 
-                TrackItem temptrack = (TrackItem) this.tracklist.get(i);
+                TrackItem temptrack = (TrackItem) tracklist.get(i);
                 temptrack.setPlaycount(playcount);
                 temptrack.setLastplayed(lastplayed - temptrack.getLength());
 
@@ -306,14 +306,14 @@ public class DbReader {
                     temptrack.setActive(Boolean.FALSE);
                 }
 
-                this.recentplays.add(this.tracklist.get(i));
+                recentplays.add(tracklist.get(i));
             }
 
-            this.playcountsistream.reset();
-            DbReader.skipFully(this.playcountsistream, entrylen);
+            playcountsistream.reset();
+            DbReader.skipFully(playcountsistream, entrylen);
         }
 
-        Collections.sort(this.recentplays);
+        Collections.sort(recentplays);
     }
 
     /**
