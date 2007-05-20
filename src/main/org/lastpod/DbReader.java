@@ -18,10 +18,13 @@
  */
 package org.lastpod;
 
+import org.lastpod.util.IoUtils;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import java.math.BigInteger;
 
@@ -52,22 +55,12 @@ public class DbReader {
     private String playcountsfile;
 
     /**
-     * A buffered stream that reads the iTunes database file.
-     */
-    private BufferedInputStream itunesistream;
-
-    /**
-     * A buffered stream that reads the iPod play counts file.
-     */
-    private BufferedInputStream playcountsistream;
-
-    /**
      * A list of all the tracks from the iTunes databaes file.
      */
     private ArrayList tracklist;
 
     /**
-     * Stores a boolean value that will be passed into <code>TrackItem</code>
+     * Stores a boolean value that will be passed into <code>TrackItem</code>.
      */
     boolean parseVariousArtists;
 
@@ -90,6 +83,8 @@ public class DbReader {
      *
      * @param itunespath  Directory containing the iTunesDB and the corresponding
      *                         Play Counts, including trailing "\" or "/".
+     * @param parseVariousArtists  If <code>true</code> then parses "Various
+     * Artists"
      */
     public DbReader(String itunespath, boolean parseVariousArtists) {
         if (!itunespath.endsWith(File.separator)) {
@@ -118,16 +113,28 @@ public class DbReader {
      * @throws IOException  Thrown if errors occur.
      */
     public void parse() throws IOException {
+        InputStream itunesFileIn = null;
+        InputStream itunesBufferedIn = null;
+        InputStream playCountsFileIn = null;
+        InputStream playCountsBufferedIn = null;
+
         try {
-            FileInputStream itstream = new FileInputStream(itunesfile);
-            itunesistream = new BufferedInputStream(itstream, 65535);
+            itunesFileIn = new FileInputStream(itunesfile);
+            itunesBufferedIn = new BufferedInputStream(itunesFileIn, 65535);
+
+            parseitunesdb(itunesBufferedIn);
         } catch (IOException e) {
             throw new IOException("Error reading iTunes Database");
+        } finally {
+            IoUtils.cleanup(itunesFileIn, null);
+            IoUtils.cleanup(itunesBufferedIn, null);
         }
 
         try {
-            FileInputStream pcstream = new FileInputStream(playcountsfile);
-            playcountsistream = new BufferedInputStream(pcstream, 65535);
+            playCountsFileIn = new FileInputStream(playcountsfile);
+            playCountsBufferedIn = new BufferedInputStream(playCountsFileIn, 65535);
+
+            parseplaycounts(playCountsBufferedIn);
         } catch (IOException e) {
             String errorMsg =
                 "Error reading Play Counts Database.\n"
@@ -135,20 +142,19 @@ public class DbReader {
                 + "This can also be caused if you are running iTunes and you have it setup "
                 + "to automatically run iTunes when an iPod is detected.";
             throw new IOException(errorMsg);
+        } finally {
+            IoUtils.cleanup(playCountsFileIn, null);
+            IoUtils.cleanup(playCountsBufferedIn, null);
         }
-
-        parseitunesdb();
-        parseplaycounts();
-
-        itunesistream.close();
-        playcountsistream.close();
     }
 
     /**
      * Parses track information from the iTunesDB.
+     * @param itunesistream  A stream that reads the iTunes database file.
      * @throws IOException  Thrown if errors occur.
      */
-    public void parseitunesdb() throws IOException {
+    public void parseitunesdb(InputStream itunesistream)
+            throws IOException {
         byte[] buf = new byte[1];
 
         //we seek one at a time because the mhit marker won't always be at a multiple of four
@@ -159,7 +165,7 @@ public class DbReader {
                 itunesistream.read(buf);
 
                 if (new String(buf).equals("hit")) {
-                    tracklist.add(parsemhit());
+                    tracklist.add(parsemhit(itunesistream));
                 } else {
                     itunesistream.reset();
                 }
@@ -171,10 +177,12 @@ public class DbReader {
 
     /**
      * Parses an MHIT object from the iTunes Database.
+     * @param itunesistream  A stream that reads the iTunes database file.
      * @return Returns parsed track object.
      * @throws IOException  Thrown if errors occur.
      */
-    public TrackItem parsemhit() throws IOException {
+    public TrackItem parsemhit(InputStream itunesistream)
+            throws IOException {
         byte[] dword = new byte[4];
         TrackItem track = new TrackItem();
         track.setParseVariousArtists(parseVariousArtists);
@@ -201,7 +209,7 @@ public class DbReader {
         DbReader.skipFully(itunesistream, headersize - 4); //skip to end of MHIT
 
         for (long i = 0; i < nummhods; i++) {
-            parsemhod(track);
+            parsemhod(track, itunesistream);
         }
 
         return track;
@@ -210,9 +218,11 @@ public class DbReader {
     /**
      * Parses an MHOD object and sets proper fields in the track item object.
      * @param track  Track Item.
+     * @param itunesistream  A stream that reads the iTunes database file.
      * @throws IOException  Thrown if errors occur.
      */
-    public void parsemhod(TrackItem track) throws IOException {
+    public void parsemhod(TrackItem track, InputStream itunesistream)
+            throws IOException {
         byte[] dword = new byte[4];
 
         itunesistream.mark(1048576); //mark beginning of MHOD location
@@ -264,9 +274,11 @@ public class DbReader {
 
     /**
      * Parses play counts information from "Play Counts".
+     * @param playcountsistream  A stream that reads the iPod play counts file.
      * @throws IOException  Thrown if errors occur.
      */
-    public void parseplaycounts() throws IOException {
+    public void parseplaycounts(InputStream playcountsistream)
+            throws IOException {
         byte[] dword = new byte[4];
 
         DbReader.skipFully(playcountsistream, 8);
@@ -344,7 +356,7 @@ public class DbReader {
      * @param bytes Number of bytes to skip.
      * @throws IOException  Thrown if errors occur.
      */
-    public static void skipFully(BufferedInputStream stream, long bytes)
+    public static void skipFully(InputStream stream, long bytes)
             throws IOException {
         for (long i = stream.skip(bytes); i < bytes; i += stream.skip(bytes - i)) {
             /* The loop itself performs all the logic needed to skip. */
