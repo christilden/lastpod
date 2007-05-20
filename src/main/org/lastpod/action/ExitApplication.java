@@ -26,6 +26,8 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  * A <code>javax.swing.Action</code> class that is used to open the
@@ -39,6 +41,16 @@ public class ExitApplication extends AbstractAction {
     public static final long serialVersionUID = 200705171718L;
 
     /**
+     * A reference to the main application frame.
+     */
+    private JFrame mainAppFrame = null;
+
+    /**
+     * Is <code>true</code> if the submission was successful.
+     */
+    private boolean submissionSuccessful = false;
+
+    /**
      * Constructs this action.
      * @param mainAppFrame  The main frame for this application.
      * @param text  The action's text.
@@ -46,10 +58,29 @@ public class ExitApplication extends AbstractAction {
      * @param desc  The action's detailed description.
      * @param mnemonic  The action's mnemonic.
      */
-    public ExitApplication(String text, ImageIcon icon, String desc, int mnemonic) {
+    public ExitApplication(JFrame mainAppFrame, String text, ImageIcon icon, String desc,
+        int mnemonic) {
         super(text, icon);
+        this.mainAppFrame = mainAppFrame;
         putValue(SHORT_DESCRIPTION, desc);
         putValue(MNEMONIC_KEY, new Integer(mnemonic));
+    }
+
+    /**
+     * Returns <code>true</code> if the submission was successful.
+     * @return  <code>true</code> if the submission was successful.
+     */
+    public boolean isSubmissionSuccessful() {
+        return submissionSuccessful;
+    }
+
+    /**
+     * Set to <code>true</code> if the submission was successful.
+     * @param submissionSuccessful  <code>true</code> if the submission was
+     * successful.
+     */
+    public void setSubmissionSuccessful(boolean submissionSuccessful) {
+        this.submissionSuccessful = submissionSuccessful;
     }
 
     /**
@@ -57,7 +88,24 @@ public class ExitApplication extends AbstractAction {
      * @param e  The event that triggered the action.
      */
     public void actionPerformed(ActionEvent e) {
-        launchItunes();
+        int choice = JOptionPane.YES_OPTION;
+
+        if (itunesLaunchEnabled() && !isSubmissionSuccessful()) {
+            /* Default to no option if submission was not successful. */
+            choice = JOptionPane.NO_OPTION;
+
+            String message =
+                "No tracks have been submitted to Last.fm.\n"
+                + " Would you still like to launch iTunes?";
+            String title = "Launch iTunes";
+            int opt = JOptionPane.YES_NO_OPTION;
+            choice = JOptionPane.showConfirmDialog(mainAppFrame, message, title, opt);
+        }
+
+        if (choice == JOptionPane.YES_OPTION) {
+            launchItunes();
+        }
+
         System.exit(0);
     }
 
@@ -82,5 +130,16 @@ public class ExitApplication extends AbstractAction {
                 System.out.println(iTunesPath + " not found!  Cannot launch iTunes.");
             }
         }
+    }
+
+    /**
+     * Returns <code>true</code> when iTunes should be launched.
+     * @return  <code>true</code> when iTunes should be launched.
+     */
+    private boolean itunesLaunchEnabled() {
+        Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
+        String iTunesStatus = fPrefs.get("iTunes Status", "Disabled");
+
+        return (iTunesStatus.equals("Enabled")) ? true : false;
     }
 }

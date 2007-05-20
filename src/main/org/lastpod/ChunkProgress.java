@@ -35,4 +35,11 @@ public interface ChunkProgress {
      * @param numberOfChunks  The number of chunks to be submitted.
      */
     void setNumberOfChunks(final int numberOfChunks);
+
+    /**
+     * Set to <code>true</code> if the submission was successful.
+     * @param completionStatus  <code>true</code> if the submission was
+     * successful.
+     */
+    void setCompletionStatus(boolean completionStatus);
 }

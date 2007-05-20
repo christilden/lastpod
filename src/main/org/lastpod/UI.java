@@ -114,7 +114,7 @@ public class UI implements ChunkProgress {
                 "Unselects All Tracks", KeyEvent.VK_A);
         actionSubmitTracks = new SubmitTracks(statusAnimationLabel, "Submit Tracks",
                 iconSubmitTracks, "Submits the selected tracks to Last.fm", KeyEvent.VK_S);
-        actionExit = new ExitApplication("Exit", iconExit,
+        actionExit = new ExitApplication(frame, "Exit", iconExit,
                 "Exits the application.  May launch iTunes", KeyEvent.VK_X);
     }
 
@@ -285,5 +285,14 @@ public class UI implements ChunkProgress {
      */
     public void setNumberOfChunks(final int numberOfChunks) {
         progressBar.setMaximum(numberOfChunks);
+    }
+
+    /**
+     * Set to <code>true</code> if the submission was successful.
+     * @param completionStatus  <code>true</code> if the submission was
+     * successful.
+     */
+    public void setCompletionStatus(boolean completionStatus) {
+        ((ExitApplication) actionExit).setSubmissionSuccessful(completionStatus);
     }
 }

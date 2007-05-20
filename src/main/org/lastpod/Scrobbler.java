@@ -301,6 +301,8 @@ public class Scrobbler {
         logger.log(Level.INFO,
             "You must now sync your iPod with your music management software "
             + "or delete 'Play Counts' from the iTunes folder!");
+
+        chunkProgress.setCompletionStatus(true);
     }
 
     /**
