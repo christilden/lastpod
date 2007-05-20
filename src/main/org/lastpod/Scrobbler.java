@@ -77,6 +77,16 @@ public class Scrobbler {
     private String submitUrl;
 
     /**
+     * Stores the chunks of tracks to be submitted.
+     */
+    private List trackChunks;
+
+    /**
+     * Displays the submission progress as this class updates it.
+     */
+    private ChunkProgress chunkProgress;
+
+    /**
      * The number of seconds to pause between submissions. Only if the server
      * asks to do so.
      */
@@ -90,10 +100,38 @@ public class Scrobbler {
         logger = Logger.getLogger(getClass().getPackage().getName());
     }
 
-    public void handshake(List recentPlayed)
+    /**
+     * Sets the object that displays submission progress.  This object updates
+     * the progress as it is processing.
+     * @param chunkProgress  The object that displays submission progress.
+     */
+    public void setChunkProgress(ChunkProgress chunkProgress) {
+        this.chunkProgress = chunkProgress;
+    }
+
+    /**
+     * Sets the tracks that are submitted.
+     * @param recentPlayed  A list of tracks to submit.
+     */
+    public void setTracksToSubmit(final List recentPlayed) {
+        if (recentPlayed.size() == 0) {
+            throw new RuntimeException("No tracks to submit");
+        }
+
+        /* Converts the recentPlayed List into a List of Chunk objects.  Each
+         * chunk stores at most 10 tracks.  Each chunk will be submitted to
+         * Last.fm individually, per their guidelines.
+         */
+        trackChunks = ChunkUtil.createChunks(recentPlayed, MAX_TRACKS_PER_CHUNK);
+
+        /* Add 1 because the handshake will also be included in the progress. */
+        chunkProgress.setNumberOfChunks(trackChunks.size() + 1);
+    }
+
+    public void handshake()
             throws UnsupportedEncodingException, MalformedURLException, IOException,
                 FailedLoginException {
-        if (recentPlayed.size() == 0) {
+        if (trackChunks.size() == 0) {
             throw new RuntimeException("No tracks to submit");
         }
 
@@ -170,15 +208,18 @@ public class Scrobbler {
 
         challenge = lines[1];
 
+        /* Displays some progress update once the handshake is completed. */
+        chunkProgress.updateCurrentChunk(1);
+
         logger.log(Level.INFO, "Handshake completed");
     }
 
-    public void submitTracks(final List recentPlayed, ChunkProgress chunkProgress)
+    public void submitTracks()
             throws UnsupportedEncodingException, NoSuchAlgorithmException, MalformedURLException,
                 IOException, FailedLoginException {
         logger.log(Level.INFO, "Submitting tracks...");
 
-        if (recentPlayed.size() == 0) {
+        if (trackChunks.size() == 0) {
             throw new RuntimeException("No tracks to submit");
         }
 
@@ -188,20 +229,12 @@ public class Scrobbler {
         String urlEncodedUsername = URLEncoder.encode(username, "UTF-8");
         String urlEncodedChallange = URLEncoder.encode(md5chal, "UTF-8");
 
-        /* Converts the recentPlayed List into a List of Chunk objects.  Each
-         * chunk stores at most 10 tracks.  Each chunk will be submitted to
-         * Last.fm individually, per their guidelines.
-         */
-        List chunks = ChunkUtil.createChunks(recentPlayed, MAX_TRACKS_PER_CHUNK);
-
-        chunkProgress.setNumberOfChunks(chunks.size());
-
         Chunk chunk = null;
 
-        for (int i = 0; i < chunks.size(); i++) {
+        for (int i = 0; i < trackChunks.size(); i++) {
             pauseIfRequired();
 
-            chunk = (Chunk) chunks.get(i);
+            chunk = (Chunk) trackChunks.get(i);
 
             String queryString = "u=" + urlEncodedUsername + "&" + "s=" + urlEncodedChallange;
 
@@ -257,7 +290,11 @@ public class Scrobbler {
                 throw new RuntimeException("Unknown error submitting tracks");
             }
 
-            chunkProgress.updateCurrentChunk(i + 1);
+            /* Add 2 to progress.  1 because chunk progress starts at 1, whereas
+             * this for-loop is zero indexed.  1 because the handshake is also
+             * part of the progress.
+             */
+            chunkProgress.updateCurrentChunk(i + 2);
         }
 
         logger.log(Level.INFO, "Tracks submitted");
