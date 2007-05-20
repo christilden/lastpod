@@ -52,17 +52,17 @@ public class LastPod {
      * GUI to display it.
      */
     private static void load() {
-        LastPod.recentplayed = new ArrayList();
-        LastPod.UI = new UI();
-        LastPod.UI.buildUI();
+        recentplayed = new ArrayList();
+        UI = new UI();
+        UI.buildUI();
 
         logger = Logger.getLogger(LastPod.class.getPackage().getName());
         logger.setLevel(Level.ALL);
         logger.addHandler(new LogHandler());
 
-        LastPod.parsePlayCounts();
+        parsePlayCounts();
 
-        LastPod.UI.makeVisable();
+        UI.makeVisable();
     }
 
     /**
@@ -75,7 +75,7 @@ public class LastPod {
         boolean parseVariousArtists = parseVariousArtistsStr.equals("1") ? true : false;
 
         if (iTunesPath.equals("default")) {
-            logger.log(Level.INFO, LastPod.NO_PREFS_ERROR);
+            logger.log(Level.INFO, NO_PREFS_ERROR);
 
             return;
         }
@@ -84,8 +84,8 @@ public class LastPod {
 
         try {
             reader.parse();
-            LastPod.recentplayed = reader.getRecentplays();
-            LastPod.UI.newTrackListAvailable();
+            recentplayed = reader.getRecentplays();
+            UI.newTrackListAvailable();
         } catch (IOException e) {
             StackTraceElement[] trace = e.getStackTrace();
 
@@ -126,27 +126,27 @@ public class LastPod {
         String encryptedDefault = MiscUtilities.md5DigestPassword("default");
 
         if (username.equals("default") && encryptedPassword.equals(encryptedDefault)) {
-            logger.log(Level.INFO, LastPod.NO_PREFS_ERROR);
+            logger.log(Level.INFO, NO_PREFS_ERROR);
 
-            return LastPod.NO_PREFS_ERROR;
+            return NO_PREFS_ERROR;
         }
 
         String backupUrl = fPrefs.get("backupUrl", "");
 
         try {
-            LastPod.scrobbler = new Scrobbler(username, encryptedPassword, backupUrl);
+            scrobbler = new Scrobbler(username, encryptedPassword, backupUrl);
 
             List activeRecentPlayed = onlyActiveTrackItems(recentplayed);
             List inactiveRecentPlayed = onlyInactiveTrackItems(recentplayed);
 
-            LastPod.scrobbler.setChunkProgress(LastPod.UI);
-            LastPod.scrobbler.setTracksToSubmit(activeRecentPlayed);
-            LastPod.scrobbler.handshake();
-            LastPod.scrobbler.submitTracks();
-            LastPod.scrobbler.addHistories(activeRecentPlayed, inactiveRecentPlayed);
+            scrobbler.setChunkProgress(UI);
+            scrobbler.setTracksToSubmit(activeRecentPlayed);
+            scrobbler.handshake();
+            scrobbler.submitTracks();
+            scrobbler.addHistories(activeRecentPlayed, inactiveRecentPlayed);
 
             /* Refresh track list. */
-            LastPod.UI.newTrackListAvailable();
+            UI.newTrackListAvailable();
         } catch (Exception e) {
             StackTraceElement[] trace = e.getStackTrace();
 
@@ -207,7 +207,7 @@ public class LastPod {
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    LastPod.load();
+                    load();
                 }
             });
     }
