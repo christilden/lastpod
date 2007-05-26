@@ -3,6 +3,7 @@ package org.lastpod;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class MockModel implements Model {
     private List recentlyPlayed = null;
@@ -53,17 +54,23 @@ public class MockModel implements Model {
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.MONTH, Calendar.MAY);
         cal.set(Calendar.DAY_OF_MONTH, 25);
+        cal.set(Calendar.HOUR, 10);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
 
         for (int i = 0; i <= 30; i++) {
             TrackItem trackItem = new TrackItem();
             trackItem.setTrackid(1);
-            trackItem.setActive(Boolean.TRUE);
             trackItem.setLength(60);
             trackItem.setArtist("My Chemical Romance");
             trackItem.setAlbum("The Black Parade");
             trackItem.setTrack("Welcome To The Black Parade");
             trackItem.setPlaycount(1);
             trackItem.setLastplayed(cal.getTimeInMillis() / 1000);
+
+            if (History.getInstance(".").isInHistory(trackItem.getLastplayed())) {
+                trackItem.setActive(Boolean.FALSE);
+            }
 
             recentlyPlayed.add(trackItem);
 
@@ -80,6 +87,7 @@ public class MockModel implements Model {
      */
     public Object submitTracks(UI userInterface) {
         List activeRecentPlayed = onlyActiveTrackItems(recentlyPlayed);
+        List inactiveRecentPlayed = onlyInactiveTrackItems(recentlyPlayed);
 
         userInterface.setNumberOfChunks(activeRecentPlayed.size());
 
@@ -87,14 +95,21 @@ public class MockModel implements Model {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                // TODO: handle exception
+                /* Just ignore. */
             }
 
             TrackItem trackItem = (TrackItem) activeRecentPlayed.get(i);
             trackItem.setActive(Boolean.FALSE);
             userInterface.updateCurrentChunk(i + 1);
+
+            Logger logger = Logger.getLogger(LastPod.class.getPackage().getName());
+            logger.info("The logger should be really noisy.");
         }
 
+        History.getInstance(".");
+
+        Scrobbler scrobbler = new Scrobbler(null, null, null);
+        scrobbler.addHistories(activeRecentPlayed, inactiveRecentPlayed);
         userInterface.setCompletionStatus(true);
 
         /* Refresh track list. */
@@ -105,6 +120,10 @@ public class MockModel implements Model {
 
     private List onlyActiveTrackItems(List recentPlayed) {
         return filterTrackItems(recentPlayed, true);
+    }
+
+    private List onlyInactiveTrackItems(List recentPlayed) {
+        return filterTrackItems(recentPlayed, false);
     }
 
     private List filterTrackItems(List recentPlayed, boolean filterActive) {
