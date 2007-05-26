@@ -18,6 +18,7 @@
  */
 package org.lastpod.action;
 
+import org.lastpod.Model;
 import org.lastpod.PreferencesEditor;
 import org.lastpod.UI;
 
@@ -43,19 +44,26 @@ public class OpenPreferencesEditor extends AbstractAction {
     private UI userInterface = null;
 
     /**
+     * The application's model.
+     */
+    private Model model = null;
+
+    /**
      * Constructs this action.
      * @param userInterface  The application's user interface.
+     * @param model  The application's model.
      * @param text  The action's text.
      * @param icon  The action's icon.
      * @param desc  The action's detailed description.
      * @param mnemonic  The action's mnemonic.
      */
-    public OpenPreferencesEditor(UI userInterface, String text, ImageIcon icon, String desc,
-        int mnemonic) {
+    public OpenPreferencesEditor(UI userInterface, Model model, String text, ImageIcon icon,
+        String desc, int mnemonic) {
         super(text, icon);
         putValue(SHORT_DESCRIPTION, desc);
         putValue(MNEMONIC_KEY, new Integer(mnemonic));
         this.userInterface = userInterface;
+        this.model = model;
     }
 
     /**
@@ -63,7 +71,7 @@ public class OpenPreferencesEditor extends AbstractAction {
      * @param e  The event that triggered the action.
      */
     public void actionPerformed(ActionEvent e) {
-        PreferencesEditor prefeditor = new PreferencesEditor(userInterface);
+        PreferencesEditor prefeditor = new PreferencesEditor(userInterface, model);
         prefeditor.buildUI();
     }
 }

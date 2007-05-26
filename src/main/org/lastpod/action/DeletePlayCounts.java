@@ -18,14 +18,13 @@
  */
 package org.lastpod.action;
 
-import org.lastpod.LastPod;
+import org.lastpod.Model;
 import org.lastpod.UI;
 
 import java.awt.event.ActionEvent;
 
 import java.io.File;
 
-import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -49,16 +48,24 @@ public class DeletePlayCounts extends AbstractAction {
     private UI userInterface = null;
 
     /**
+     * The application's model.
+     */
+    private Model model = null;
+
+    /**
      * Constructs this action.
      * @param userInterface  The application's user interface.
+     * @param model  The application's model.
      * @param text  The action's text.
      * @param icon  The action's icon.
      * @param desc  The action's detailed description.
      * @param mnemonic  The action's mnemonic.
      */
-    public DeletePlayCounts(UI userInterface, String text, ImageIcon icon, String desc, int mnemonic) {
+    public DeletePlayCounts(UI userInterface, Model model, String text, ImageIcon icon,
+        String desc, int mnemonic) {
         super(text, icon);
         this.userInterface = userInterface;
+        this.model = model;
         putValue(SHORT_DESCRIPTION, desc);
         putValue(MNEMONIC_KEY, new Integer(mnemonic));
     }
@@ -100,9 +107,10 @@ public class DeletePlayCounts extends AbstractAction {
 
         if (succuss) {
             /* Clear recent track list. */
-            LastPod.recentplayed = new ArrayList();
+            model.clearRecentlyPlayed();
+
             /* Refresh track list. */
-            userInterface.newTrackListAvailable();
+            userInterface.newTrackListAvailable(model.getRecentlyPlayed());
         } else {
             String message = "The play counts file was not deleted.";
             String title = "Delete failure";

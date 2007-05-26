@@ -31,7 +31,6 @@ import java.awt.event.MouseListener;
 
 import java.io.File;
 
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -63,6 +62,11 @@ public class PreferencesEditor {
      * The application's user interface.
      */
     private UI userInterface = null;
+
+    /**
+     * The application's model.
+     */
+    private Model model = null;
     private JDialog frame;
     private SpringLayout layout;
     private JTextField userfield;
@@ -78,9 +82,11 @@ public class PreferencesEditor {
     /**
      * Constructs this object.
      * @param userInterface  The application's user interface.
+     * @param model  The application's model.
      */
-    public PreferencesEditor(UI userInterface) {
+    public PreferencesEditor(UI userInterface, Model model) {
         this.userInterface = userInterface;
+        this.model = model;
     }
 
     public void buildUI() {
@@ -402,9 +408,9 @@ public class PreferencesEditor {
          * changed.
          */
         if (!oldItunesPath.equals(newItunesPath)) {
-            LastPod.recentplayed = new ArrayList();
-            LastPod.parsePlayCounts();
-            userInterface.newTrackListAvailable();
+            model.clearRecentlyPlayed();
+            model.parsePlayCounts(userInterface);
+            userInterface.newTrackListAvailable(model.getRecentlyPlayed());
         }
     }
 

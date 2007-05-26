@@ -18,7 +18,7 @@
  */
 package org.lastpod.action;
 
-import org.lastpod.LastPod;
+import org.lastpod.Model;
 import org.lastpod.UI;
 
 import org.lastpod.util.SwingUtils;
@@ -43,6 +43,16 @@ public class SubmitTracks extends AbstractAction {
      * Required for serializable classes.
      */
     public static final long serialVersionUID = 200705180016L;
+
+    /**
+     * The application's user interface.
+     */
+    private UI userInterface = null;
+
+    /**
+     * The application's model.
+     */
+    private Model model = null;
 
     /**
      * A timer used for the busy icon.
@@ -77,16 +87,20 @@ public class SubmitTracks extends AbstractAction {
 
     /**
      * Constructs this action.
+     * @param userInterface  The application's user interface.
+     * @param model  The application's model.
      * @param text  The action's text.
      * @param icon  The action's icon.
      * @param desc  The action's detailed description.
      * @param mnemonic  The action's mnemonic.
      */
-    public SubmitTracks(JLabel statusAnimationLabel, String text, ImageIcon icon, String desc,
-        int mnemonic) {
+    public SubmitTracks(UI userInterface, Model model, JLabel statusAnimationLabel, String text,
+        ImageIcon icon, String desc, int mnemonic) {
         super(text, icon);
         putValue(SHORT_DESCRIPTION, desc);
         putValue(MNEMONIC_KEY, new Integer(mnemonic));
+        this.userInterface = userInterface;
+        this.model = model;
         this.statusAnimationLabel = statusAnimationLabel;
 
         idleIcon = SwingUtils.createImageIcon(UI.class, "images/busyicons/idle-icon.png");
@@ -131,7 +145,7 @@ public class SubmitTracks extends AbstractAction {
                         busyIconIndex = 0;
                         busyIconTimer.start();
 
-                        return LastPod.submitTracks();
+                        return model.submitTracks(userInterface);
                     }
 
                     public void finished() {

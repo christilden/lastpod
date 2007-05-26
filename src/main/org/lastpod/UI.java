@@ -35,6 +35,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import java.util.List;
+
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -100,7 +102,7 @@ public class UI implements ChunkProgress {
     /**
      * Constructs the user interface and some icon elements.
      */
-    public UI() {
+    public UI(Model model) {
         frame = new JFrame("LastPod");
 
         ImageIcon idleIcon = SwingUtils.createImageIcon(UI.class, "images/busyicons/idle-icon.png");
@@ -116,13 +118,13 @@ public class UI implements ChunkProgress {
             SwingUtils.createImageIcon(UI.class, "images/stock_data-delete-table.png");
         ImageIcon iconExit = SwingUtils.createImageIcon(UI.class, "images/application-exit.png");
 
-        actionOpenPreferences = new OpenPreferencesEditor(this, "Preferences", iconOpenPreferences,
-                "Opens Preferences Editor", KeyEvent.VK_P);
-        actionUnselectAll = new UnselectAll(frame, "Unselect All", iconUnselectAll,
+        actionOpenPreferences = new OpenPreferencesEditor(this, model, "Preferences",
+                iconOpenPreferences, "Opens Preferences Editor", KeyEvent.VK_P);
+        actionUnselectAll = new UnselectAll(frame, model, "Unselect All", iconUnselectAll,
                 "Unselects All Tracks", KeyEvent.VK_A);
-        actionSubmitTracks = new SubmitTracks(statusAnimationLabel, "Submit Tracks",
+        actionSubmitTracks = new SubmitTracks(this, model, statusAnimationLabel, "Submit Tracks",
                 iconSubmitTracks, "Submits the selected tracks to Last.fm", KeyEvent.VK_S);
-        actionDeletePlayCounts = new DeletePlayCounts(this, "Delete Play Counts",
+        actionDeletePlayCounts = new DeletePlayCounts(this, model, "Delete Play Counts",
                 iconDeletePlayCounts, "Removes the play counts file from the iPod.", KeyEvent.VK_D);
         actionExit = new ExitApplication(frame, "Exit", iconExit,
                 "Exits the application.  May launch iTunes", KeyEvent.VK_X);
@@ -271,8 +273,8 @@ public class UI implements ChunkProgress {
         frame.setVisible(true);
     }
 
-    public void newTrackListAvailable() {
-        this.recentpanel.newTrackListAvailable();
+    public void newTrackListAvailable(List recentlyPlayed) {
+        recentpanel.newTrackListAvailable(recentlyPlayed);
     }
 
     public JTextArea getLogtextarea() {

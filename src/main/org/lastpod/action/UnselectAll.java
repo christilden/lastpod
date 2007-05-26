@@ -18,7 +18,7 @@
  */
 package org.lastpod.action;
 
-import org.lastpod.LastPod;
+import org.lastpod.Model;
 
 import java.awt.event.ActionEvent;
 
@@ -42,6 +42,11 @@ public class UnselectAll extends AbstractAction {
     private JFrame mainAppFrame = null;
 
     /**
+     * The application's model.
+     */
+    private Model model = null;
+
+    /**
      * If <code>true</code> this action selects all tracks.  If
      * <code>false</code> this action unselects all tracks.
      */
@@ -50,16 +55,19 @@ public class UnselectAll extends AbstractAction {
     /**
      * Constructs this action.
      * @param mainAppFrame  The main frame for this application.
+     * @param model  The application's model.
      * @param text  The action's text.
      * @param icon  The action's icon.
      * @param desc  The action's detailed description.
      * @param mnemonic  The action's mnemonic.
      */
-    public UnselectAll(JFrame mainAppFrame, String text, ImageIcon icon, String desc, int mnemonic) {
+    public UnselectAll(JFrame mainAppFrame, Model model, String text, ImageIcon icon, String desc,
+        int mnemonic) {
         super(text, icon);
         putValue(SHORT_DESCRIPTION, desc);
         putValue(MNEMONIC_KEY, new Integer(mnemonic));
         this.mainAppFrame = mainAppFrame;
+        this.model = model;
     }
 
     /**
@@ -84,12 +92,12 @@ public class UnselectAll extends AbstractAction {
      */
     public void actionPerformed(ActionEvent e) {
         if (selectAllType.booleanValue()) {
-            LastPod.selectAll();
+            model.selectAll();
             setSelectAllType(Boolean.FALSE);
             putValue(NAME, "Unselect All");
             putValue(SHORT_DESCRIPTION, "Unselects All Tracks");
         } else {
-            LastPod.unselectAll();
+            model.unselectAll();
             setSelectAllType(Boolean.TRUE);
             putValue(NAME, "Select All");
             putValue(SHORT_DESCRIPTION, "Selects All Tracks");

@@ -23,6 +23,7 @@ import java.awt.GridLayout;
 import java.text.DateFormat;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -30,13 +31,21 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 /**
+ * @author Chris Tilden
  * @author muti
  * @version $Id$
  */
 public class RecentPanel extends JPanel {
+    /**
+     * Required for serializable classes.
+     */
+    public static final long serialVersionUID = 200705252321L;
     private JTable table;
     private RecentModel model;
 
+    /**
+     * Constructs the panel for recently played tracks.
+     */
     public RecentPanel() {
         super(new GridLayout(1, 1));
 
@@ -54,21 +63,39 @@ public class RecentPanel extends JPanel {
         add(scrollpane);
     }
 
-    public void newTrackListAvailable() {
-        this.model.fireTableDataChanged();
+    public void newTrackListAvailable(List recentlyPlayed) {
+        model.setRecentlyPlayed(recentlyPlayed);
+        model.fireTableDataChanged();
     }
 
     private class RecentModel extends AbstractTableModel {
+        /**
+         * Required for serializable classes.
+         */
+        public static final long serialVersionUID = 200705252320L;
+
+        /**
+         * A list of recently played tracks.
+         */
+        private List recentlyPlayed = null;
         private String[] columnData =
             new String[] { "#", "Submit", "Artist", "Album", "Track", "Length", "Play Time" };
+
+        /**
+         * Sets the list of recenlty played tracks.
+         * @param recentlyPlayed  The list of recently played tracks.
+         */
+        public void setRecentlyPlayed(List recentlyPlayed) {
+            this.recentlyPlayed = recentlyPlayed;
+        }
 
         public int getColumnCount() {
             return this.columnData.length;
         }
 
         public int getRowCount() {
-            if (LastPod.recentplayed != null) {
-                return LastPod.recentplayed.size();
+            if (recentlyPlayed != null) {
+                return recentlyPlayed.size();
             }
 
             return 0;
@@ -86,8 +113,8 @@ public class RecentPanel extends JPanel {
         public Object getValueAt(int row, int col) {
             TrackItem track;
 
-            if (LastPod.recentplayed != null) {
-                track = (TrackItem) LastPod.recentplayed.get(row);
+            if (recentlyPlayed != null) {
+                track = (TrackItem) recentlyPlayed.get(row);
             } else {
                 return new Object();
             }
@@ -130,11 +157,11 @@ public class RecentPanel extends JPanel {
                     throw new RuntimeException("Active must be a Boolean.");
                 }
 
-                if (LastPod.recentplayed == null) {
+                if (recentlyPlayed == null) {
                     throw new RuntimeException("Recent Played list is NULL!");
                 }
 
-                track = (TrackItem) LastPod.recentplayed.get(row);
+                track = (TrackItem) recentlyPlayed.get(row);
                 track.setActive(((Boolean) value));
                 fireTableCellUpdated(row, col);
             }
