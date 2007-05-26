@@ -18,52 +18,18 @@
  */
 package org.lastpod;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The LastPod controller.
- * @author muti
  * @author Chris Tilden
  * @version $Id$
  */
-public class LastPod {
-    public final static String NO_PREFS_ERROR =
-        "You have not setup your preferences.\n"
-        + "Please click Preferences below to configure the location of "
-        + "your iTunesDB (it's on your iPod's drive) and your AudioScrobbler "
-        + "username and password.";
-    private UI userInterface;
-    private List recentplayed; //parsed using DbReader class
-
-    /**
-     * Loads the recent played information from the iPod and constructs the
-     * GUI to display it.
-     * @param model  The application's model.
-     */
-    protected void load(Model model) {
-        recentplayed = new ArrayList();
-
-        model.setRecentlyPlayed(recentplayed);
-        userInterface = new UI(model);
-        userInterface.buildUI();
-
-        Logger logger = Logger.getLogger(LastPod.class.getPackage().getName());
-        logger.setLevel(Level.ALL);
-        logger.addHandler(new LogHandler(userInterface));
-
-        model.parsePlayCounts(userInterface);
-
-        userInterface.makeVisable();
-    }
-
+public class LastPodMock {
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     /* Use this application model. */
-                    Model model = new ModelImpl();
+                    Model model = new MockModel();
 
                     LastPod lastPod = new LastPod();
                     lastPod.load(model);

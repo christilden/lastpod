@@ -179,6 +179,25 @@
     </java>
   </target>
 
+  <target name="run-mock" depends="compile,run-debug"
+      description="Runs the dist jar file with debugging enabled.">
+
+    <property name="lastpod.debug" value="Debugging is not enabled."/>
+    <property name="lastpod.arg1" value="-D"/>
+    <property name="lastpod.arg2" value="-D"/>
+    <property name="lastpod.arg3" value="-D"/>
+    <property name="lastpod.arg4" value="-D"/>
+
+    <echo message="${lastpod.debug}"/>
+    <java classname="org.lastpod.LastPodMock" fork="true">
+      <classpath refid="project.classpath"/>
+      <jvmarg value="${lastpod.arg1}"/>
+      <jvmarg value="${lastpod.arg2}"/>
+      <jvmarg value="${lastpod.arg3}"/>
+      <jvmarg value="${lastpod.arg4}"/>
+    </java>
+  </target>
+
   <!-- create a jar file for deployment. -->
   <target name="dist" depends="prepare,compile"
       description="Creates a JAR file containing the application.">
