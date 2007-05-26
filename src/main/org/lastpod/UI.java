@@ -116,13 +116,13 @@ public class UI implements ChunkProgress {
             SwingUtils.createImageIcon(UI.class, "images/stock_data-delete-table.png");
         ImageIcon iconExit = SwingUtils.createImageIcon(UI.class, "images/application-exit.png");
 
-        actionOpenPreferences = new OpenPreferencesEditor(frame, "Preferences",
-                iconOpenPreferences, "Opens Preferences Editor", KeyEvent.VK_P);
+        actionOpenPreferences = new OpenPreferencesEditor(this, "Preferences", iconOpenPreferences,
+                "Opens Preferences Editor", KeyEvent.VK_P);
         actionUnselectAll = new UnselectAll(frame, "Unselect All", iconUnselectAll,
                 "Unselects All Tracks", KeyEvent.VK_A);
         actionSubmitTracks = new SubmitTracks(statusAnimationLabel, "Submit Tracks",
                 iconSubmitTracks, "Submits the selected tracks to Last.fm", KeyEvent.VK_S);
-        actionDeletePlayCounts = new DeletePlayCounts(frame, "Delete Play Counts",
+        actionDeletePlayCounts = new DeletePlayCounts(this, "Delete Play Counts",
                 iconDeletePlayCounts, "Removes the play counts file from the iPod.", KeyEvent.VK_D);
         actionExit = new ExitApplication(frame, "Exit", iconExit,
                 "Exits the application.  May launch iTunes", KeyEvent.VK_X);

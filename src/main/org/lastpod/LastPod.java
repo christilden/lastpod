@@ -37,7 +37,7 @@ import javax.swing.JOptionPane;
  * @version $Id$
  */
 public class LastPod {
-    public static UI UI;
+    private static UI UI;
     public static List recentplayed; //parsed using DbReader class
     private static Scrobbler scrobbler;
     private static Logger logger;
@@ -58,7 +58,7 @@ public class LastPod {
 
         logger = Logger.getLogger(LastPod.class.getPackage().getName());
         logger.setLevel(Level.ALL);
-        logger.addHandler(new LogHandler());
+        logger.addHandler(new LogHandler(UI));
 
         parsePlayCounts();
 

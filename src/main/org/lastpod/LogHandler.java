@@ -28,6 +28,19 @@ import javax.swing.JTextArea;
  * @version $Id$
  */
 public class LogHandler extends Handler {
+    /**
+     * The user interface.
+     */
+    private UI userInterface = null;
+
+    /**
+     * Constructs this object.
+     * @param userInterface  The user interface.
+     */
+    public LogHandler(UI userInterface) {
+        this.userInterface = userInterface;
+    }
+
     public void close() {
         return;
     }
@@ -41,7 +54,7 @@ public class LogHandler extends Handler {
             return;
         }
 
-        JTextArea logtextarea = LastPod.UI.getLogtextarea();
+        JTextArea logtextarea = userInterface.getLogtextarea();
         logtextarea.append(record.getMessage() + "\n");
     }
 }

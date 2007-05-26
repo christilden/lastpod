@@ -58,7 +58,11 @@ import javax.swing.border.TitledBorder;
  */
 public class PreferencesEditor {
     private Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
-    private JFrame mainFrame;
+
+    /**
+     * The application's user interface.
+     */
+    private UI userInterface = null;
     private JDialog frame;
     private SpringLayout layout;
     private JTextField userfield;
@@ -71,12 +75,16 @@ public class PreferencesEditor {
     private JLabel iTunesStatus;
     private JButton browsebuttoniTunes;
 
-    public PreferencesEditor(JFrame mainFrame) {
-        this.mainFrame = mainFrame;
+    /**
+     * Constructs this object.
+     * @param userInterface  The application's user interface.
+     */
+    public PreferencesEditor(UI userInterface) {
+        this.userInterface = userInterface;
     }
 
     public void buildUI() {
-        this.frame = new JDialog(mainFrame, "Preferences...", true);
+        this.frame = new JDialog(userInterface.getFrame(), "Preferences...", true);
         this.layout = new SpringLayout();
         this.frame.getContentPane().setLayout(this.layout);
 
@@ -396,7 +404,7 @@ public class PreferencesEditor {
         if (!oldItunesPath.equals(newItunesPath)) {
             LastPod.recentplayed = new ArrayList();
             LastPod.parsePlayCounts();
-            LastPod.UI.newTrackListAvailable();
+            userInterface.newTrackListAvailable();
         }
     }
 

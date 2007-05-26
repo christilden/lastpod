@@ -19,6 +19,7 @@
 package org.lastpod.action;
 
 import org.lastpod.LastPod;
+import org.lastpod.UI;
 
 import java.awt.event.ActionEvent;
 
@@ -29,7 +30,6 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
@@ -44,22 +44,21 @@ public class DeletePlayCounts extends AbstractAction {
     public static final long serialVersionUID = 200705171718L;
 
     /**
-     * A reference to the main application frame.
+     * The application's user interface.
      */
-    private JFrame mainAppFrame = null;
+    private UI userInterface = null;
 
     /**
      * Constructs this action.
-     * @param mainAppFrame  The main frame for this application.
+     * @param userInterface  The application's user interface.
      * @param text  The action's text.
      * @param icon  The action's icon.
      * @param desc  The action's detailed description.
      * @param mnemonic  The action's mnemonic.
      */
-    public DeletePlayCounts(JFrame mainAppFrame, String text, ImageIcon icon, String desc,
-        int mnemonic) {
+    public DeletePlayCounts(UI userInterface, String text, ImageIcon icon, String desc, int mnemonic) {
         super(text, icon);
-        this.mainAppFrame = mainAppFrame;
+        this.userInterface = userInterface;
         putValue(SHORT_DESCRIPTION, desc);
         putValue(MNEMONIC_KEY, new Integer(mnemonic));
     }
@@ -73,7 +72,7 @@ public class DeletePlayCounts extends AbstractAction {
         String message = "Are you sure you want to\npermanently delete your Play Counts?";
         String title = "Confirm delete";
         int opt = JOptionPane.YES_NO_OPTION;
-        choice = JOptionPane.showConfirmDialog(mainAppFrame, message, title, opt);
+        choice = JOptionPane.showConfirmDialog(userInterface.getFrame(), message, title, opt);
 
         if (choice == JOptionPane.YES_OPTION) {
             deletePlayCounts();
@@ -103,12 +102,12 @@ public class DeletePlayCounts extends AbstractAction {
             /* Clear recent track list. */
             LastPod.recentplayed = new ArrayList();
             /* Refresh track list. */
-            LastPod.UI.newTrackListAvailable();
+            userInterface.newTrackListAvailable();
         } else {
             String message = "The play counts file was not deleted.";
             String title = "Delete failure";
             int opt = JOptionPane.ERROR_MESSAGE;
-            JOptionPane.showMessageDialog(mainAppFrame, message, title, opt);
+            JOptionPane.showMessageDialog(userInterface.getFrame(), message, title, opt);
         }
     }
 }
