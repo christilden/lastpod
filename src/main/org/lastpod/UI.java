@@ -23,6 +23,7 @@ import org.lastpod.action.ExitApplication;
 import org.lastpod.action.OpenPreferencesEditor;
 import org.lastpod.action.SubmitTracks;
 import org.lastpod.action.UnselectAll;
+import org.lastpod.action.ViewLog;
 
 import org.lastpod.util.SwingUtils;
 
@@ -47,7 +48,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -61,7 +61,11 @@ import javax.swing.SwingUtilities;
  */
 public class UI implements ChunkProgress {
     private RecentPanel recentpanel;
-    private JTextArea logtextarea;
+
+    /**
+     * A status label for the submission.
+     */
+    private JLabel submitStatus = null;
 
     /**
      * Displays the progress of the submit.
@@ -90,6 +94,11 @@ public class UI implements ChunkProgress {
     private final Action actionSubmitTracks;
 
     /**
+     * The action that views the log.
+     */
+    private final Action actionViewLog;
+
+    /**
      * The action that deletes the iPod's play counts file.
      */
     private final Action actionDeletePlayCounts;
@@ -104,6 +113,8 @@ public class UI implements ChunkProgress {
      */
     public UI(Model model) {
         frame = new JFrame("LastPod");
+
+        submitStatus = new JLabel();
 
         ImageIcon idleIcon = SwingUtils.createImageIcon(UI.class, "images/busyicons/idle-icon.png");
         statusAnimationLabel = new JLabel();
@@ -122,8 +133,10 @@ public class UI implements ChunkProgress {
                 iconOpenPreferences, "Opens Preferences Editor", KeyEvent.VK_P);
         actionUnselectAll = new UnselectAll(frame, model, "Unselect All", iconUnselectAll,
                 "Unselects All Tracks", KeyEvent.VK_A);
-        actionSubmitTracks = new SubmitTracks(this, model, statusAnimationLabel, "Submit Tracks",
-                iconSubmitTracks, "Submits the selected tracks to Last.fm", KeyEvent.VK_S);
+        actionSubmitTracks = new SubmitTracks(this, model, "Submit Tracks", iconSubmitTracks,
+                "Submits the selected tracks to Last.fm", KeyEvent.VK_S);
+        actionViewLog = new ViewLog(this, "View Log", iconOpenPreferences,
+                "Opens Preferences Editor", KeyEvent.VK_L);
         actionDeletePlayCounts = new DeletePlayCounts(this, model, "Delete Play Counts",
                 iconDeletePlayCounts, "Removes the play counts file from the iPod.", KeyEvent.VK_D);
         actionExit = new ExitApplication(frame, "Exit", iconExit,
@@ -206,6 +219,12 @@ public class UI implements ChunkProgress {
 
         toolBar.addSeparator();
 
+        button = new JButton(actionViewLog);
+        layout.setConstraints(button, c);
+        toolBar.add(button);
+
+        toolBar.addSeparator();
+
         button = new JButton(actionDeletePlayCounts);
         layout.setConstraints(button, c);
         toolBar.add(button);
@@ -228,24 +247,18 @@ public class UI implements ChunkProgress {
         layout.setConstraints(this.recentpanel, c);
         frame.getContentPane().add(this.recentpanel);
 
-        c.gridy = 2;
-        c.weighty = 0.5;
-        this.logtextarea = new JTextArea("=====LOG=====\n");
-        this.logtextarea.setLineWrap(true);
-        this.logtextarea.setWrapStyleWord(true);
-        this.logtextarea.setEditable(false);
-
-        JScrollPane scrollpane = new JScrollPane(this.logtextarea);
-        layout.setConstraints(scrollpane, c);
-        frame.getContentPane().add(scrollpane);
-
         c.gridwidth = 1;
         c.weightx = 0.0;
         c.weighty = 0.0;
-
         c.fill = GridBagConstraints.NONE;
+        c.anchor = GridBagConstraints.WEST;
+        c.gridx = 0;
+        c.gridy = 2;
+        c.insets = new Insets(3, 10, 4, 5);
+        layout.setConstraints(submitStatus, c);
+        frame.getContentPane().add(submitStatus);
+
         c.gridx = 2;
-        c.gridy = 3;
         c.anchor = GridBagConstraints.LAST_LINE_END;
 
         JPanel statusBar = new JPanel();
@@ -257,7 +270,6 @@ public class UI implements ChunkProgress {
 
         c.gridx = 0;
         c.gridy = 0;
-        c.insets = new Insets(3, 10, 4, 5);
         layout.setConstraints(progressBar, c);
         statusBar.add(progressBar);
 
@@ -278,7 +290,19 @@ public class UI implements ChunkProgress {
     }
 
     public JTextArea getLogtextarea() {
-        return this.logtextarea;
+        return ((ViewLog) actionViewLog).getLogTextArea();
+    }
+
+    public UnselectAll getUnselectAll() {
+        return (UnselectAll) actionUnselectAll;
+    }
+
+    public JLabel getStatusAnimationLabel() {
+        return statusAnimationLabel;
+    }
+
+    public JLabel getSubmitStatus() {
+        return submitStatus;
     }
 
     /**

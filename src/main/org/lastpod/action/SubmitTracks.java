@@ -30,7 +30,6 @@ import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.Timer;
 
 /**
@@ -75,11 +74,6 @@ public class SubmitTracks extends AbstractAction {
     private int busyIconIndex = 0;
 
     /**
-     * The label used to display the idle and busy icons.
-     */
-    private JLabel statusAnimationLabel;
-
-    /**
      * This worker is used to perform the submission and is a nice threaded
      * implementation.
      */
@@ -94,14 +88,13 @@ public class SubmitTracks extends AbstractAction {
      * @param desc  The action's detailed description.
      * @param mnemonic  The action's mnemonic.
      */
-    public SubmitTracks(UI userInterface, Model model, JLabel statusAnimationLabel, String text,
-        ImageIcon icon, String desc, int mnemonic) {
+    public SubmitTracks(UI userInterface, Model model, String text, ImageIcon icon, String desc,
+        int mnemonic) {
         super(text, icon);
         putValue(SHORT_DESCRIPTION, desc);
         putValue(MNEMONIC_KEY, new Integer(mnemonic));
         this.userInterface = userInterface;
         this.model = model;
-        this.statusAnimationLabel = statusAnimationLabel;
 
         idleIcon = SwingUtils.createImageIcon(UI.class, "images/busyicons/idle-icon.png");
         setupBusyIcon();
@@ -120,7 +113,7 @@ public class SubmitTracks extends AbstractAction {
                 new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         busyIconIndex = (busyIconIndex + 1) % busyIcons.length;
-                        statusAnimationLabel.setIcon(busyIcons[busyIconIndex]);
+                        userInterface.getStatusAnimationLabel().setIcon(busyIcons[busyIconIndex]);
                     }
                 });
     }
@@ -141,7 +134,8 @@ public class SubmitTracks extends AbstractAction {
         worker =
             new SwingWorker() {
                     public Object construct() {
-                        statusAnimationLabel.setIcon(busyIcons[0]);
+                        userInterface.getSubmitStatus().setText("Transferring Data...");
+                        userInterface.getStatusAnimationLabel().setIcon(busyIcons[0]);
                         busyIconIndex = 0;
                         busyIconTimer.start();
 
@@ -149,8 +143,10 @@ public class SubmitTracks extends AbstractAction {
                     }
 
                     public void finished() {
+                        userInterface.getSubmitStatus().setText("Done");
                         busyIconTimer.stop();
-                        statusAnimationLabel.setIcon(idleIcon);
+                        userInterface.getStatusAnimationLabel().setIcon(idleIcon);
+                        userInterface.getUnselectAll().reset();
                         setEnabled(true);
                     }
                 };

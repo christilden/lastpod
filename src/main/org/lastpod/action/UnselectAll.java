@@ -71,6 +71,15 @@ public class UnselectAll extends AbstractAction {
     }
 
     /**
+     * Resets this button.
+     */
+    public void reset() {
+        setSelectAllType(Boolean.FALSE);
+        putValue(NAME, "Unselect All");
+        putValue(SHORT_DESCRIPTION, "Unselects All Tracks");
+    }
+
+    /**
      * Gets the action's select all type.
      * @return  The action's select all type.
      */
