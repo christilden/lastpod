@@ -106,6 +106,7 @@ public class MockModel implements Model {
     public Object submitTracks(UI userInterface) {
         List activeRecentPlayed = onlyActiveTrackItems(recentlyPlayed);
         List inactiveRecentPlayed = onlyInactiveTrackItems(recentlyPlayed);
+        Logger logger = Logger.getLogger(LastPod.class.getPackage().getName());
 
         userInterface.setNumberOfChunks(activeRecentPlayed.size());
 
@@ -120,8 +121,9 @@ public class MockModel implements Model {
             trackItem.setActive(Boolean.FALSE);
             userInterface.updateCurrentChunk(i + 1);
 
-            Logger logger = Logger.getLogger(LastPod.class.getPackage().getName());
-            logger.info("The logger should be really noisy.");
+            String statusMessage = "The logger should be really noisy.";
+            userInterface.setSubmitStatusMessage(statusMessage);
+            logger.info(statusMessage);
         }
 
         History.getInstance(".");
@@ -132,6 +134,10 @@ public class MockModel implements Model {
 
         /* Refresh track list. */
         userInterface.newTrackListAvailable(recentlyPlayed);
+
+        String statusMessage = "Done.";
+        userInterface.setSubmitStatusMessage(statusMessage);
+        logger.info(statusMessage);
 
         return "Success";
     }

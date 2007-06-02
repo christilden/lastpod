@@ -341,4 +341,12 @@ public class UI implements ChunkProgress {
     public void setCompletionStatus(boolean completionStatus) {
         ((ExitApplication) actionExit).setSubmissionSuccessful(completionStatus);
     }
+
+    /**
+     * Sets the message for the submitStatus label.
+     * @param submitStatusMessage  The message for the submitStatus label.
+     */
+    public void setSubmitStatusMessage(String submitStatusMessage) {
+        submitStatus.setText(submitStatusMessage);
+    }
 }

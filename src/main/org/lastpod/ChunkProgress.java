@@ -42,4 +42,10 @@ public interface ChunkProgress {
      * successful.
      */
     void setCompletionStatus(boolean completionStatus);
+
+    /**
+     * Sets the message for the submitStatus label.
+     * @param submitStatusMessage  The message for the submitStatus label.
+     */
+    void setSubmitStatusMessage(String submitStatusMessage);
 }

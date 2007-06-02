@@ -135,11 +135,16 @@ public class Scrobbler {
             throw new RuntimeException("No tracks to submit");
         }
 
-        logger.log(Level.INFO, "Beginning Handshake");
+        String statusMessage = "Beginning Handshake";
+        chunkProgress.setSubmitStatusMessage(statusMessage);
+        logger.log(Level.INFO, statusMessage);
 
         String args = "?hs=true&p=1.1&c=apd&v=0.1&u=" + URLEncoder.encode(username, "UTF-8");
         URL url = new URL("http://post.audioscrobbler.com/" + args);
-        logger.log(Level.FINE, "Handshaking to URL: " + url.toString());
+
+        statusMessage = "Handshaking to URL: " + url.toString();
+        chunkProgress.setSubmitStatusMessage(statusMessage);
+        logger.log(Level.FINE, statusMessage);
 
         HttpURLConnection c = (HttpURLConnection) url.openConnection();
 
@@ -169,21 +174,29 @@ public class Scrobbler {
         logger.log(Level.FINE, "Received from server:\n" + content);
 
         if ((content == null) || (content.length() == 0)) {
-            throw new RuntimeException("Invalid response received from AudioScrobbler");
+            statusMessage = "Invalid response received from AudioScrobbler";
+            chunkProgress.setSubmitStatusMessage(statusMessage);
+            throw new RuntimeException(statusMessage);
         }
 
         String[] lines = content.split("\n");
 
         if ((lines[0].length() >= 6) && lines[0].substring(0, 6).equals("FAILED")) {
-            throw new RuntimeException(lines[0].substring(7));
+            statusMessage = lines[0].substring(7);
+            chunkProgress.setSubmitStatusMessage(statusMessage);
+            throw new RuntimeException(statusMessage);
         }
 
         if ((lines[0].length() >= 7) && lines[0].substring(0, 7).equals("BADUSER")) {
-            throw new FailedLoginException("Invalid Username");
+            statusMessage = "Invalid Username";
+            chunkProgress.setSubmitStatusMessage(statusMessage);
+            throw new FailedLoginException(statusMessage);
         }
 
         if ((lines[0].length() >= 6) && lines[0].substring(0, 6).equals("UPDATE")) {
-            throw new RuntimeException("Update your client:" + lines[0].substring(7));
+            statusMessage = "Update your client:" + lines[0].substring(7);
+            chunkProgress.setSubmitStatusMessage(statusMessage);
+            throw new RuntimeException(statusMessage);
         }
 
         /* Sets the interval, if it is present in the response. */
@@ -211,16 +224,22 @@ public class Scrobbler {
         /* Displays some progress update once the handshake is completed. */
         chunkProgress.updateCurrentChunk(1);
 
-        logger.log(Level.INFO, "Handshake completed");
+        statusMessage = "Handshake completed";
+        chunkProgress.setSubmitStatusMessage(statusMessage);
+        logger.log(Level.INFO, statusMessage);
     }
 
     public void submitTracks()
             throws UnsupportedEncodingException, NoSuchAlgorithmException, MalformedURLException,
                 IOException, FailedLoginException {
-        logger.log(Level.INFO, "Submitting tracks...");
+        String statusMessage = "Submitting tracks...";
+        chunkProgress.setSubmitStatusMessage(statusMessage);
+        logger.log(Level.INFO, statusMessage);
 
         if (trackChunks.size() == 0) {
-            throw new RuntimeException("No tracks to submit");
+            statusMessage = "No tracks to submit";
+            chunkProgress.setSubmitStatusMessage(statusMessage);
+            throw new RuntimeException(statusMessage);
         }
 
         MessageDigest md = MessageDigest.getInstance("MD5");
@@ -297,9 +316,10 @@ public class Scrobbler {
             chunkProgress.updateCurrentChunk(i + 2);
         }
 
+        chunkProgress.setSubmitStatusMessage("Done. You may now sync your iPod.");
         logger.log(Level.INFO, "Tracks submitted");
         logger.log(Level.INFO,
-            "You must now sync your iPod with your music management software "
+            "You may now sync your iPod with your music management software "
             + "or delete 'Play Counts' from the iTunes folder!");
 
         chunkProgress.setCompletionStatus(true);
@@ -314,8 +334,6 @@ public class Scrobbler {
      */
     private void pauseIfRequired() {
         if (interval != 0) {
-            logger.log(Level.INFO, "The server is busy.  Pausing for " + interval + " seconds.");
-
             try {
                 Thread.sleep(interval * 1000);
             } catch (InterruptedException e) {

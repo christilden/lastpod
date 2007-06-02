@@ -134,7 +134,6 @@ public class SubmitTracks extends AbstractAction {
         worker =
             new SwingWorker() {
                     public Object construct() {
-                        userInterface.getSubmitStatus().setText("Transferring Data...");
                         userInterface.getStatusAnimationLabel().setIcon(busyIcons[0]);
                         busyIconIndex = 0;
                         busyIconTimer.start();
@@ -143,7 +142,6 @@ public class SubmitTracks extends AbstractAction {
                     }
 
                     public void finished() {
-                        userInterface.getSubmitStatus().setText("Done");
                         busyIconTimer.stop();
                         userInterface.getStatusAnimationLabel().setIcon(idleIcon);
                         userInterface.getUnselectAll().reset();
