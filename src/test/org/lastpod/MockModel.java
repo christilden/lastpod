@@ -133,6 +133,8 @@ public class MockModel implements Model {
         userInterface.setCompletionStatus(true);
 
         /* Refresh track list. */
+        recentlyPlayed = new ArrayList();
+        parsePlayCounts(userInterface);
         userInterface.newTrackListAvailable(recentlyPlayed);
 
         String statusMessage = "Done.";

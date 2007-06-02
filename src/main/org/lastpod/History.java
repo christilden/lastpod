@@ -121,6 +121,7 @@ public class History {
      * @param historyTime  The time the track was last played.
      */
     public void addhistory(long historyTime) {
+        histories.add(Long.toString(historyTime));
         newHistories.add(Long.toString(historyTime));
     }
 

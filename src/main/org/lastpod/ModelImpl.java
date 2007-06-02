@@ -154,6 +154,8 @@ public class ModelImpl implements Model {
             scrobbler.addHistories(activeRecentPlayed, inactiveRecentPlayed);
 
             /* Refresh track list. */
+            recentlyPlayed = new ArrayList();
+            parsePlayCounts(userInterface);
             userInterface.newTrackListAvailable(recentlyPlayed);
         } catch (Exception e) {
             StackTraceElement[] trace = e.getStackTrace();
