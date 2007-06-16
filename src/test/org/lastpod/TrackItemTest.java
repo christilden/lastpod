@@ -36,6 +36,39 @@ public class TrackItemTest extends TestCase {
     }
 
     /**
+     * Tests that the copy constructor works properly.
+     */
+    public void testCopyConstructor() {
+        TrackItem trackItem2 = new TrackItem();
+        trackItem2.setTrackid(1);
+        trackItem2.setActive(Boolean.TRUE);
+        trackItem2.setLength(60);
+        trackItem2.setArtist("My Chemical Romance");
+        trackItem2.setAlbum("The Black Parade");
+        trackItem2.setTrack("Welcome To The Black Parade");
+        trackItem2.setPlaycount(1);
+        trackItem2.setLastplayed(1);
+        trackItem2.setParseVariousArtists(true);
+
+        TrackItem trackItem = new TrackItem(trackItem2);
+
+        assertEquals(1, trackItem.getTrackid());
+        assertEquals(Boolean.TRUE, trackItem.isActive());
+        assertEquals(60, trackItem.getLength());
+        assertEquals("My Chemical Romance", trackItem.getArtist());
+        assertEquals("The Black Parade", trackItem.getAlbum());
+        assertEquals("Welcome To The Black Parade", trackItem.getTrack());
+        assertEquals(1, trackItem.getPlaycount());
+        assertEquals(1, trackItem.getLastplayed());
+        assertEquals(true, trackItem.isParseVariousArtists());
+
+        /* Make sure the copy constructor worked properly. */
+        trackItem2.setArtist("Chris Tilden");
+        assertEquals("Chris Tilden", trackItem2.getArtist());
+        assertEquals("My Chemical Romance", trackItem.getArtist());
+    }
+
+    /**
      * Tests a normal track (not "Various Artists").
      */
     public void testNormalTrack() {

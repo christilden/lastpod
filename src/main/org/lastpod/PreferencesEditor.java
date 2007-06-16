@@ -74,6 +74,7 @@ public class PreferencesEditor {
     private JTextField dbfield;
     private JTextField backupUrlField;
     private JCheckBox parseVariousArtistsCheck;
+    private JCheckBox parseMultiPlayTracksCheck;
     private JTextField iTunesfield;
     private JCheckBox iTCheck;
     private JLabel iTunesStatus;
@@ -236,14 +237,17 @@ public class PreferencesEditor {
 
         String toolTip =
             "<html>If a URL is entered the play information will be<br>"
-            + " submitted to both Last.fm and the given URL.  This allows one<br>"
-            + " to perform a backup of the Last.fm data.<br><br>"
-            + " If the parse option is checked then LastPod will parse the track<br>"
-            + " information when the artist is \"Various Artists\".  The<br>"
-            + " parsing consists of spliting the artist and track from the<br>"
-            + "orgininal track String.  (For example, \"Bing Crosby - <br>"
-            + "I'll Be Home for Christmas\" becomes artist=Bing Crosby<br>"
-            + "and track name=I'll Be Home for Christmas.";
+            + "submitted to both Last.fm and the given URL.  This allows one<br>"
+            + "to perform a backup of the Last.fm data.<br><br>"
+            + "If the parse various artists option is enabled, LastPod will<br>"
+            + "parse the track information when the artist is \"Various<br>"
+            + "Artists\". The parsing consists of spliting the artist and track<br>"
+            + "from the original track String.  (For example, \"Bing<br>"
+            + "Crosby - I'll Be Home for Christmas\" becomes artist=Bing<br>"
+            + "Crosby and track name=I'll Be Home for Christmas.<br><br>"
+            + "If parse multi-play tracks is enabled, LastPod will generate<br>"
+            + "a new track as needed.  This provides more accurate statistics,<br>"
+            + "but invalid play times.";
         p3.setToolTipText(toolTip);
 
         JLabel backupUrlLabel = new JLabel("Backup URL: ");
@@ -265,7 +269,21 @@ public class PreferencesEditor {
             });
         p3.add(parseVariousArtistsCheck);
 
-        SpringUtilities.makeCompactGrid(p3, 2, 2, 5, 2, 3, 4);
+        JLabel parseMultiPlayTracksLabel = new JLabel("Parse Multi-Play Tracks: ");
+        p3.add(parseMultiPlayTracksLabel);
+        parseMultiPlayTracksCheck = new JCheckBox();
+        parseMultiPlayTracksCheck.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (parseMultiPlayTracksCheck.isSelected()) {
+                        parseMultiPlayTracksCheck.setText("Enabled");
+                    } else {
+                        parseMultiPlayTracksCheck.setText("Disabled");
+                    }
+                }
+            });
+        p3.add(parseMultiPlayTracksCheck);
+
+        SpringUtilities.makeCompactGrid(p3, 3, 2, 5, 2, 3, 4);
         p.add(p3);
 
         JPanel p5 = new JPanel();
@@ -373,6 +391,14 @@ public class PreferencesEditor {
             parseVariousArtistsCheck.setText("Disabled");
             parseVariousArtistsCheck.setSelected(false);
         }
+
+        if (fPrefs.get("parseMultiPlayTracks", "1").equals("1")) {
+            parseMultiPlayTracksCheck.setText("Enabled");
+            parseMultiPlayTracksCheck.setSelected(true);
+        } else {
+            parseMultiPlayTracksCheck.setText("Disabled");
+            parseMultiPlayTracksCheck.setSelected(false);
+        }
     }
 
     private void savePreferences() {
@@ -389,13 +415,16 @@ public class PreferencesEditor {
         }
 
         boolean selected = parseVariousArtistsCheck.isSelected();
+        boolean selected2 = parseMultiPlayTracksCheck.isSelected();
         String parseVariousArtists = selected ? "1" : "0";
+        String parseMultiPlayTracks = selected2 ? "1" : "0";
 
         fPrefs.put("iTunes Path", newItunesPath);
         fPrefs.put("backupUrl", this.backupUrlField.getText());
         fPrefs.put("iT Path", this.iTunesfield.getText());
         fPrefs.put("iTunes Status", this.iTunesStatus.getText());
         fPrefs.put("parseVariousArtists", parseVariousArtists);
+        fPrefs.put("parseMultiPlayTracks", parseMultiPlayTracks);
 
         try {
             fPrefs.flush();

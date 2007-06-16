@@ -18,19 +18,15 @@
  */
 package org.lastpod;
 
-import org.lastpod.util.IoUtils;
+import org.lastpod.parser.TrackItemParser;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import java.math.BigInteger;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
+import java.util.List;
 
 /**
  * Reads the iTunes database directly from the iPod.
@@ -40,36 +36,21 @@ import java.util.Collections;
  */
 public class DbReader {
     /**
-     * The location of the iTunes path.
+     * Parses the itunesDatabase.
      */
-    private String iTunesPath;
+    private TrackItemParser itunesDbParser;
 
     /**
-     * The location of the iTunes database file.
+     * Parses the Play Counts file.
      */
-    private String itunesfile;
-
-    /**
-     * The location of the iPod play counts file.
-     */
-    private String playcountsfile;
-
-    /**
-     * A list of all the tracks from the iTunes databaes file.
-     */
-    private ArrayList tracklist;
-
-    /**
-     * Stores a boolean value that will be passed into <code>TrackItem</code>.
-     */
-    boolean parseVariousArtists;
+    private TrackItemParser playCountsParser;
 
     /**
      * A list of the recently played tracks from the iPod play counts file.
      * (Sorted by play time. This is important because otherwise Last.fm will
      * reject them.)
      */
-    private ArrayList recentplays;
+    private List recentplays;
 
     /**
      * Default constructor should not be used.
@@ -81,251 +62,30 @@ public class DbReader {
     /**
      * Initializes the class with the locations of the iPod DB files.
      *
-     * @param itunespath  Directory containing the iTunesDB and the corresponding
-     *                         Play Counts, including trailing "\" or "/".
-     * @param parseVariousArtists  If <code>true</code> then parses "Various
-     * Artists"
      */
-    public DbReader(String itunespath, boolean parseVariousArtists) {
-        if (!itunespath.endsWith(File.separator)) {
-            itunespath += File.separator;
-        }
-
-        this.iTunesPath = itunespath;
-        this.itunesfile = itunespath + "iTunesDB";
-        this.playcountsfile = itunespath + "Play Counts";
-        this.tracklist = new ArrayList();
+    public DbReader(TrackItemParser itunesDbParser, TrackItemParser playCountsParser) {
+        this.itunesDbParser = itunesDbParser;
         this.recentplays = new ArrayList();
-        this.parseVariousArtists = parseVariousArtists;
+        this.playCountsParser = playCountsParser;
     }
 
     /**
      * Gets the recent plays.
      * @return Returns recent plays.
      */
-    public ArrayList getRecentplays() {
+    public List getRecentplays() {
         return recentplays;
     }
 
     /**
      * Attempts to open and parse the DB & Play Counts files, creating
      * the appropriate data structures.
-     * @throws IOException  Thrown if errors occur.
      */
-    public void parse() throws IOException {
-        InputStream itunesFileIn = null;
-        InputStream itunesBufferedIn = null;
-        InputStream playCountsFileIn = null;
-        InputStream playCountsBufferedIn = null;
+    public void parse() {
+        List trackList = itunesDbParser.parse();
 
-        try {
-            itunesFileIn = new FileInputStream(itunesfile);
-            itunesBufferedIn = new BufferedInputStream(itunesFileIn, 65535);
-
-            parseitunesdb(itunesBufferedIn);
-        } catch (IOException e) {
-            throw new IOException("Error reading iTunes Database");
-        } finally {
-            IoUtils.cleanup(itunesFileIn, null);
-            IoUtils.cleanup(itunesBufferedIn, null);
-        }
-
-        try {
-            playCountsFileIn = new FileInputStream(playcountsfile);
-            playCountsBufferedIn = new BufferedInputStream(playCountsFileIn, 65535);
-
-            parseplaycounts(playCountsBufferedIn);
-        } catch (IOException e) {
-            String errorMsg =
-                "Error reading Play Counts Database.\n"
-                + "Have you listened to any music on your iPod recently?\n"
-                + "This can also be caused if you are running iTunes and you have it setup "
-                + "to automatically run iTunes when an iPod is detected.";
-            throw new IOException(errorMsg);
-        } finally {
-            IoUtils.cleanup(playCountsFileIn, null);
-            IoUtils.cleanup(playCountsBufferedIn, null);
-        }
-    }
-
-    /**
-     * Parses track information from the iTunesDB.
-     * @param itunesistream  A stream that reads the iTunes database file.
-     * @throws IOException  Thrown if errors occur.
-     */
-    public void parseitunesdb(InputStream itunesistream)
-            throws IOException {
-        byte[] buf = new byte[1];
-
-        //we seek one at a time because the mhit marker won't always be at a multiple of four
-        while (itunesistream.read(buf) != -1) {
-            if (buf[0] == 'm') { //Search for MHIT
-                itunesistream.mark(1048576);
-                buf = new byte[3];
-                itunesistream.read(buf);
-
-                if (new String(buf).equals("hit")) {
-                    tracklist.add(parsemhit(itunesistream));
-                } else {
-                    itunesistream.reset();
-                }
-            }
-
-            buf = new byte[1];
-        }
-    }
-
-    /**
-     * Parses an MHIT object from the iTunes Database.
-     * @param itunesistream  A stream that reads the iTunes database file.
-     * @return Returns parsed track object.
-     * @throws IOException  Thrown if errors occur.
-     */
-    public TrackItem parsemhit(InputStream itunesistream)
-            throws IOException {
-        byte[] dword = new byte[4];
-        TrackItem track = new TrackItem();
-        track.setParseVariousArtists(parseVariousArtists);
-
-        itunesistream.mark(1048576); //mark beginning of MHIT location
-
-        itunesistream.read(dword);
-
-        long headersize = DbReader.littleEndianToBigInt(dword).longValue();
-
-        DbReader.skipFully(itunesistream, 4);
-        itunesistream.read(dword);
-
-        long nummhods = DbReader.littleEndianToBigInt(dword).longValue();
-
-        itunesistream.read(dword);
-        track.setTrackid(DbReader.littleEndianToBigInt(dword).longValue());
-
-        DbReader.skipFully(itunesistream, 20);
-        itunesistream.read(dword);
-        track.setLength(DbReader.littleEndianToBigInt(dword).longValue() / 1000);
-
-        itunesistream.reset();
-        DbReader.skipFully(itunesistream, headersize - 4); //skip to end of MHIT
-
-        for (long i = 0; i < nummhods; i++) {
-            parsemhod(track, itunesistream);
-        }
-
-        return track;
-    }
-
-    /**
-     * Parses an MHOD object and sets proper fields in the track item object.
-     * @param track  Track Item.
-     * @param itunesistream  A stream that reads the iTunes database file.
-     * @throws IOException  Thrown if errors occur.
-     */
-    public void parsemhod(TrackItem track, InputStream itunesistream)
-            throws IOException {
-        byte[] dword = new byte[4];
-
-        itunesistream.mark(1048576); //mark beginning of MHOD location
-
-        DbReader.skipFully(itunesistream, 8);
-
-        itunesistream.read(dword);
-
-        long totalsize = DbReader.littleEndianToBigInt(dword).longValue();
-
-        itunesistream.read(dword);
-
-        int mhodtype = DbReader.littleEndianToBigInt(dword).intValue();
-
-        if ((mhodtype == 1) || (mhodtype == 3) || (mhodtype == 4)) {
-            DbReader.skipFully(itunesistream, 12);
-            itunesistream.read(dword);
-
-            int strlen = DbReader.littleEndianToBigInt(dword).intValue();
-
-            DbReader.skipFully(itunesistream, 8);
-
-            byte[] data = new byte[strlen];
-            itunesistream.read(data);
-
-            String stringdata = new String(data, "UTF-16LE");
-
-            switch (mhodtype) {
-            case 1:
-                track.setTrack(stringdata);
-
-                break;
-
-            case 3:
-                track.setAlbum(stringdata);
-
-                break;
-
-            case 4:
-                track.setArtist(stringdata);
-
-                break;
-            }
-        }
-
-        itunesistream.reset();
-        DbReader.skipFully(itunesistream, totalsize);
-    }
-
-    /**
-     * Parses play counts information from "Play Counts".
-     * @param playcountsistream  A stream that reads the iPod play counts file.
-     * @throws IOException  Thrown if errors occur.
-     */
-    public void parseplaycounts(InputStream playcountsistream)
-            throws IOException {
-        byte[] dword = new byte[4];
-
-        DbReader.skipFully(playcountsistream, 8);
-        playcountsistream.read(dword);
-
-        long entrylen = DbReader.littleEndianToBigInt(dword).longValue();
-
-        playcountsistream.read(dword);
-
-        int numentries = DbReader.littleEndianToBigInt(dword).intValue();
-
-        DbReader.skipFully(playcountsistream, 80); //skip rest of header
-
-        for (int i = 0; i < (numentries - 1); i++) {
-            playcountsistream.mark(1048576); //save beginning of entry location
-
-            playcountsistream.read(dword);
-
-            long playcount = DbReader.littleEndianToBigInt(dword).longValue();
-
-            if (playcount > 0) {
-                playcountsistream.read(dword);
-
-                long lastplayed = DbReader.littleEndianToBigInt(dword).longValue();
-                lastplayed -= 2082844800; //convert to UNIX timestamp
-
-                Calendar calendar = Calendar.getInstance();
-                long offset =
-                    calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
-                lastplayed -= (offset / 1000);
-
-                TrackItem temptrack = (TrackItem) tracklist.get(i);
-                temptrack.setPlaycount(playcount);
-                temptrack.setLastplayed(lastplayed - temptrack.getLength());
-
-                if (History.getInstance(iTunesPath).isInHistory(temptrack.getLastplayed())) {
-                    temptrack.setActive(Boolean.FALSE);
-                }
-
-                recentplays.add(tracklist.get(i));
-            }
-
-            playcountsistream.reset();
-            DbReader.skipFully(playcountsistream, entrylen);
-        }
-
-        Collections.sort(recentplays);
+        playCountsParser.setTrackList(trackList);
+        recentplays = playCountsParser.parse();
     }
 
     /**

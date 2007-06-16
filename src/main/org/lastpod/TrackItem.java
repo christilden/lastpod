@@ -36,7 +36,7 @@ public class TrackItem implements Comparable {
     private boolean parseVariousArtists;
 
     /**
-     * Default constructor
+     * Default constructor.
      */
     public TrackItem() {
         this.trackid = 0;
@@ -47,6 +47,23 @@ public class TrackItem implements Comparable {
         this.track = "";
         this.playcount = 0;
         this.lastplayed = 0;
+    }
+
+    /**
+     * Constructs a new TrackItem based off the given one.
+     * @param trackItem  The TrackItem to effectively clone.
+     */
+    public TrackItem(TrackItem trackItem) {
+        super();
+        this.setTrackid(trackItem.getTrackid());
+        this.setActive(trackItem.isActive());
+        this.setLength(trackItem.getLength());
+        this.setArtist(trackItem.getArtist());
+        this.setAlbum(trackItem.getAlbum());
+        this.setTrack(trackItem.getTrack());
+        this.setPlaycount(trackItem.getPlaycount());
+        this.setLastplayed(trackItem.getLastplayed());
+        this.setParseVariousArtists(trackItem.isParseVariousArtists());
     }
 
     /**

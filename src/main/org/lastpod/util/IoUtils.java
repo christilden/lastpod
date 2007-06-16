@@ -24,6 +24,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
+import java.math.BigInteger;
+
 /**
  * Contains various I/O utility functions.
  * @author Chris Tilden
@@ -85,6 +87,41 @@ public final class IoUtils {
             }
         } catch (IOException e) {
             /* Cannot close, just give up. */
+        }
+    }
+
+    /**
+     * This converts any size byte array to a BigInteger.
+     * @param num  Little-Endian byte array.
+     * @return A BigInt.
+     */
+    public static BigInteger littleEndianToBigInt(byte[] num) {
+        byte temp;
+
+        int upperBound = num.length - 1;
+        int lowerBound = 0;
+
+        while (lowerBound < upperBound) {
+            temp = num[lowerBound];
+            num[lowerBound] = num[upperBound];
+            num[upperBound] = temp;
+            lowerBound++;
+            upperBound--;
+        }
+
+        return new BigInteger(1, num);
+    }
+
+    /**
+     * Guarantees that the specified number of bytes will be skipped.
+     * @param stream Input Stream.
+     * @param bytes Number of bytes to skip.
+     * @throws IOException  Thrown if errors occur.
+     */
+    public static void skipFully(InputStream stream, long bytes)
+            throws IOException {
+        for (long i = stream.skip(bytes); i < bytes; i += stream.skip(bytes - i)) {
+            /* The loop itself performs all the logic needed to skip. */
         }
     }
 }

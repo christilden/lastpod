@@ -18,9 +18,10 @@
  */
 package org.lastpod;
 
-import org.lastpod.util.MiscUtilities;
+import org.lastpod.parser.ItunesDbParser;
+import org.lastpod.parser.PlayCountsParser;
 
-import java.io.IOException;
+import org.lastpod.util.MiscUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,9 @@ public class ModelImpl implements Model {
         Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
         String iTunesPath = fPrefs.get("iTunes Path", "default");
         String parseVariousArtistsStr = fPrefs.get("parseVariousArtists", "1");
+        String parseMultiPlayTracksStr = fPrefs.get("parseMultiPlayTracks", "1");
         boolean parseVariousArtists = parseVariousArtistsStr.equals("1") ? true : false;
+        boolean parseMultiPlayTracks = parseMultiPlayTracksStr.equals("1") ? true : false;
 
         if (iTunesPath.equals("default")) {
             logger.log(Level.INFO, LastPod.NO_PREFS_ERROR);
@@ -87,13 +90,15 @@ public class ModelImpl implements Model {
             return;
         }
 
-        DbReader reader = new DbReader(iTunesPath, parseVariousArtists);
+        ItunesDbParser itunesDbParser = new ItunesDbParser(iTunesPath, parseVariousArtists);
+        PlayCountsParser playCountsParser = new PlayCountsParser(iTunesPath, parseMultiPlayTracks);
+        DbReader reader = new DbReader(itunesDbParser, playCountsParser);
 
         try {
             reader.parse();
             recentlyPlayed = reader.getRecentplays();
             userInterface.newTrackListAvailable(recentlyPlayed);
-        } catch (IOException e) {
+        } catch (Exception e) {
             StackTraceElement[] trace = e.getStackTrace();
 
             for (int i = 0; i < trace.length; i++) {
