@@ -71,7 +71,7 @@ public class DbReaderTest extends TestCase {
         assertEquals("Bob Marley & The Wailers", track.getArtist());
         assertEquals("Legend", track.getAlbum());
         assertEquals("No Woman, No Cry (live)", track.getTrack());
-        assertEquals(2, track.getPlaycount());
+        assertEquals(3, track.getPlaycount());
         assertEquals(1181489924, track.getLastplayed());
     }
 
@@ -93,7 +93,7 @@ public class DbReaderTest extends TestCase {
             fail(e.toString());
         }
 
-        assertTrue(recentlyPlayed.size() == 16);
+        assertTrue(recentlyPlayed.size() == 17);
 
         TrackItem track = (TrackItem) recentlyPlayed.get(14);
         assertEquals(20598, track.getTrackid());
@@ -112,5 +112,14 @@ public class DbReaderTest extends TestCase {
         assertEquals("No Woman, No Cry (live)", track.getTrack());
         assertEquals(1, track.getPlaycount());
         assertEquals(1181490351, track.getLastplayed());
+
+        track = (TrackItem) recentlyPlayed.get(16);
+        assertEquals(20598, track.getTrackid());
+        assertEquals(427, track.getLength());
+        assertEquals("Bob Marley & The Wailers", track.getArtist());
+        assertEquals("Legend", track.getAlbum());
+        assertEquals("No Woman, No Cry (live)", track.getTrack());
+        assertEquals(1, track.getPlaycount());
+        assertEquals(1181490778, track.getLastplayed());
     }
 }

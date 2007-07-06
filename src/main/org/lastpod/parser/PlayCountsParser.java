@@ -181,7 +181,8 @@ public class PlayCountsParser implements TrackItemParser {
                     long numberToManufacture = playcount - 1;
 
                     for (long j = 0; j < numberToManufacture; j++) {
-                        recentPlays.add(manufactureTrack(temptrack));
+                        temptrack = manufactureTrack(temptrack);
+                        recentPlays.add(temptrack);
                     }
                 }
             }
