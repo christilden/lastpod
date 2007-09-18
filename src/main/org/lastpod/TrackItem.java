@@ -36,6 +36,11 @@ public class TrackItem implements Comparable {
     private boolean parseVariousArtists;
 
     /**
+     * A set of strings that will be used to parse various artists.
+     */
+    private String[] variousArtistsStrings;
+
+    /**
      * Default constructor.
      */
     public TrackItem() {
@@ -104,7 +109,7 @@ public class TrackItem implements Comparable {
      */
     public String getArtist() {
         /* If required parse the track String to obtain the proper artist. */
-        if (isVariousArtistAlbum(parseVariousArtists)) {
+        if (isVariousArtistAlbum(parseVariousArtists, variousArtistsStrings)) {
             return track.split("-")[0].trim();
         }
 
@@ -117,18 +122,32 @@ public class TrackItem implements Comparable {
      * @param parseVariousArtists  <code>true</code> Will cause the track to be
      * checked to see if it is a "Various Artist" track.  If so, the artist
      * information will be parsed from the track title.
+     * @param variousArtistsString  The set of Strings to are used for various arists.
      * @return  <code>true</code> if this is a "Various Artist" album.
      */
-    public boolean isVariousArtistAlbum(boolean parseVariousArtists) {
+    public boolean isVariousArtistAlbum(boolean parseVariousArtists, String[] variousArtistsString) {
         /* Returns false if "Various Artist" tracks should not be parsed. */
         if (!parseVariousArtists) {
             return false;
         }
 
+        /* Ensures that variousArtistsString is being used. */
+        if ((variousArtistsString == null) || (variousArtistsString.length < 1)) {
+            return false;
+        }
+
         /* In addition to other checks, this makes sure the track is not null,
          * because track will need to be parsed. */
-        return (track != null) && (artist != null)
-        && artist.trim().toLowerCase().equals("various artists");
+        if ((track != null) && (artist != null)) {
+            /* If the track matches then return true right away. */
+            for (int i = 0; i < variousArtistsString.length; i++) {
+                if (artist.trim().toLowerCase().equals(variousArtistsString[i].toLowerCase())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -186,7 +205,7 @@ public class TrackItem implements Comparable {
      */
     public String getTrack() {
         /* If required parse the track String to obtain the proper track. */
-        if (isVariousArtistAlbum(parseVariousArtists)) {
+        if (isVariousArtistAlbum(parseVariousArtists, variousArtistsStrings)) {
             return track.split("-")[1].trim();
         }
 
@@ -233,6 +252,23 @@ public class TrackItem implements Comparable {
      */
     public void setParseVariousArtists(boolean parseVariousArtists) {
         this.parseVariousArtists = parseVariousArtists;
+    }
+
+    /**
+     * Gets the set of strings that will be used to parse various artists.
+     * @return  The set of strings that will be used to parse various artists.
+     */
+    public String[] getVariousArtistsStrings() {
+        return variousArtistsStrings;
+    }
+
+    /**
+     * Sets the set of strings that will be used to parse various artists.
+     * @param variousArtistsStrings  The set of strings that will be used to parse
+     * various artists.
+     */
+    public void setVariousArtistsStrings(String[] variousArtistsStrings) {
+        this.variousArtistsStrings = variousArtistsStrings;
     }
 
     public int compareTo(Object trackItem) {

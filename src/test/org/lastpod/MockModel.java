@@ -24,6 +24,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class MockModel implements Model {
+    /**
+     * A constant that stores the default "Various Artists" string.
+     */
+    private static final String[] VARIOUS_ARTISTS_STRING =
+        { "Various Artists", "__Compilations", "__Soundtracks" };
     private List recentlyPlayed = null;
 
     /**
@@ -76,8 +81,86 @@ public class MockModel implements Model {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
 
-        for (int i = 0; i <= 30; i++) {
-            TrackItem trackItem = new TrackItem();
+        /* This item should not parse out Various Artists. */
+        TrackItem trackItem = new TrackItem();
+        trackItem.setTrackid(1);
+        trackItem.setLength(60);
+        trackItem.setArtist("Various Artists");
+        trackItem.setAlbum("A 1940's Christmas");
+        trackItem.setTrack("Bing Crosby - I'll Be Home for Christmas");
+        trackItem.setPlaycount(1);
+        trackItem.setLastplayed(cal.getTimeInMillis() / 1000);
+
+        if (History.getInstance(".").isInHistory(trackItem.getLastplayed())) {
+            trackItem.setActive(Boolean.FALSE);
+        }
+
+        recentlyPlayed.add(trackItem);
+
+        cal.add(Calendar.HOUR, 1);
+
+        /* This item should parse out Various Artists. */
+        trackItem = new TrackItem();
+        trackItem.setTrackid(1);
+        trackItem.setLength(60);
+        trackItem.setArtist("Various Artists");
+        trackItem.setAlbum("A 1940's Christmas");
+        trackItem.setTrack("Bing Crosby - I'll Be Home for Christmas");
+        trackItem.setPlaycount(1);
+        trackItem.setLastplayed(cal.getTimeInMillis() / 1000);
+        trackItem.setParseVariousArtists(true);
+        trackItem.setVariousArtistsStrings(VARIOUS_ARTISTS_STRING);
+
+        if (History.getInstance(".").isInHistory(trackItem.getLastplayed())) {
+            trackItem.setActive(Boolean.FALSE);
+        }
+
+        recentlyPlayed.add(trackItem);
+
+        cal.add(Calendar.HOUR, 1);
+
+        /* This item should parse out __Compilations. */
+        trackItem = new TrackItem();
+        trackItem.setTrackid(1);
+        trackItem.setLength(60);
+        trackItem.setArtist("__Compilations");
+        trackItem.setAlbum("A 1940's Christmas");
+        trackItem.setTrack("Bing Crosby - I'll Be Home for Christmas");
+        trackItem.setPlaycount(1);
+        trackItem.setLastplayed(cal.getTimeInMillis() / 1000);
+        trackItem.setParseVariousArtists(true);
+        trackItem.setVariousArtistsStrings(VARIOUS_ARTISTS_STRING);
+
+        if (History.getInstance(".").isInHistory(trackItem.getLastplayed())) {
+            trackItem.setActive(Boolean.FALSE);
+        }
+
+        recentlyPlayed.add(trackItem);
+
+        cal.add(Calendar.HOUR, 1);
+
+        /* This item should parse out __Soundtracks. */
+        trackItem = new TrackItem();
+        trackItem.setTrackid(1);
+        trackItem.setLength(60);
+        trackItem.setArtist("__Soundtracks");
+        trackItem.setAlbum("A 1940's Christmas");
+        trackItem.setTrack("Bing Crosby - I'll Be Home for Christmas");
+        trackItem.setPlaycount(1);
+        trackItem.setLastplayed(cal.getTimeInMillis() / 1000);
+        trackItem.setParseVariousArtists(true);
+        trackItem.setVariousArtistsStrings(VARIOUS_ARTISTS_STRING);
+
+        if (History.getInstance(".").isInHistory(trackItem.getLastplayed())) {
+            trackItem.setActive(Boolean.FALSE);
+        }
+
+        recentlyPlayed.add(trackItem);
+
+        cal.add(Calendar.HOUR, 1);
+
+        for (int i = 0; i <= 27; i++) {
+            trackItem = new TrackItem();
             trackItem.setTrackid(1);
             trackItem.setLength(60);
             trackItem.setArtist("My Chemical Romance");

@@ -49,6 +49,11 @@ public class ItunesDbParser implements TrackItemParser {
     boolean parseVariousArtists;
 
     /**
+     * Stores the strings used to parse various artists.
+     */
+    String[] variousArtistsStrings;
+
+    /**
      * Default constructor should not be used.
      */
     private ItunesDbParser() {
@@ -62,14 +67,18 @@ public class ItunesDbParser implements TrackItemParser {
      *                         Play Counts, including trailing "\" or "/".
      * @param parseVariousArtists  If <code>true</code> then parses "Various
      * Artists"
+     * @param variousArtistsStrings  A String array containing the various artist
+     * strings that should be parsed.
      */
-    public ItunesDbParser(String iTunesPath, boolean parseVariousArtists) {
+    public ItunesDbParser(String iTunesPath, boolean parseVariousArtists,
+        String[] variousArtistsStrings) {
         if (!iTunesPath.endsWith(File.separator)) {
             iTunesPath += File.separator;
         }
 
         this.iTunesFile = iTunesPath + "iTunesDB";
         this.parseVariousArtists = parseVariousArtists;
+        this.variousArtistsStrings = variousArtistsStrings;
     }
 
     /**
@@ -137,6 +146,7 @@ public class ItunesDbParser implements TrackItemParser {
         byte[] dword = new byte[4];
         TrackItem track = new TrackItem();
         track.setParseVariousArtists(parseVariousArtists);
+        track.setVariousArtistsStrings(variousArtistsStrings);
 
         itunesistream.mark(1048576); //mark beginning of MHIT location
 

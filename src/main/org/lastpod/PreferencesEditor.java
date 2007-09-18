@@ -76,8 +76,10 @@ public class PreferencesEditor {
     private JCheckBox parseVariousArtistsCheck;
     private JCheckBox parseMultiPlayTracksCheck;
     private JTextField iTunesfield;
+    private JTextField parseVariousArtistsField;
     private JCheckBox iTCheck;
     private JLabel iTunesStatus;
+    private JLabel parseVariousArtistsStatus;
     private JButton browsebuttoniTunes;
 
     /**
@@ -175,8 +177,12 @@ public class PreferencesEditor {
                 public void actionPerformed(ActionEvent e) {
                     if (iTCheck.isSelected()) {
                         iTunesStatus.setText("Enabled");
+                        iTunesfield.setEditable(true);
+                        browsebuttoniTunes.setEnabled(true);
                     } else {
                         iTunesStatus.setText("Disabled");
+                        iTunesfield.setEditable(false);
+                        browsebuttoniTunes.setEnabled(false);
                     }
                 }
             });
@@ -228,6 +234,77 @@ public class PreferencesEditor {
         SpringUtilities.makeCompactGrid(p4, 2, 3, 5, 4, 3, 4);
         p.add(p4);
 
+        // Various Artists Panel
+        JPanel p6 = new JPanel();
+        p6.setLayout(new SpringLayout());
+        p.add(new JLabel());
+
+        TitledBorder b6 = BorderFactory.createTitledBorder("Various Artists:");
+        p6.setBorder(b6);
+        p6.setToolTipText("<html>If the parse various artists option is enabled,<br>"
+            + "LastPod will parse the track information when the artist is<br>"
+            + "\"Various Artists\". The parsing consists of spliting the artist<br>"
+            + "and track from the original track String.  (For example, \"Bing<br>"
+            + "Crosby - I'll Be Home for Christmas\" becomes artist=Bing<br>"
+            + "Crosby and track name=I'll Be Home for Christmas.)<br><br>"
+            + "You may also specify a semi-colon seperated list of various<br>"
+            + "artist strings.  For example, you could have the following:<br>"
+            + "Various Artists;__Soundtracks;__Compilations");
+
+        JPanel p61 = new JPanel();
+        parseVariousArtistsCheck = new JCheckBox();
+        parseVariousArtistsCheck.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (parseVariousArtistsCheck.isSelected()) {
+                        parseVariousArtistsStatus.setText("Enabled");
+                        parseVariousArtistsField.setEditable(true);
+                    } else {
+                        parseVariousArtistsStatus.setText("Disabled");
+                        parseVariousArtistsField.setEditable(false);
+                    }
+                }
+            });
+        p61.add(parseVariousArtistsCheck);
+        parseVariousArtistsStatus = new JLabel();
+        parseVariousArtistsStatus.addMouseListener(new MouseListener() {
+                public void mouseClicked(MouseEvent e) {
+                    if (parseVariousArtistsStatus.getText().equals("Disabled")) {
+                        parseVariousArtistsCheck.setSelected(true);
+                        parseVariousArtistsStatus.setText("Enabled");
+                        parseVariousArtistsField.setEditable(true);
+                    } else {
+                        parseVariousArtistsCheck.setSelected(false);
+                        parseVariousArtistsStatus.setText("Disabled");
+                        parseVariousArtistsField.setEditable(false);
+                    }
+                }
+
+                public void mouseEntered(MouseEvent e) {
+                }
+
+                public void mouseExited(MouseEvent e) {
+                }
+
+                public void mouseReleased(MouseEvent e) {
+                }
+
+                public void mousePressed(MouseEvent e) {
+                }
+            });
+        p61.add(parseVariousArtistsStatus);
+
+        p6.add(p61);
+        p6.add(new JLabel());
+
+        JLabel variousArtistsLabel = new JLabel("Various Artists String:");
+        p6.add(variousArtistsLabel);
+        parseVariousArtistsField = new JTextField();
+        parseVariousArtistsField.setPreferredSize(new Dimension(250, 20));
+        p6.add(parseVariousArtistsField);
+
+        SpringUtilities.makeCompactGrid(p6, 2, 2, 5, 4, 3, 4);
+        p.add(p6);
+
         //Options Panel
         JPanel p3 = new JPanel();
         p3.setLayout(new SpringLayout());
@@ -239,12 +316,6 @@ public class PreferencesEditor {
             "<html>If a URL is entered the play information will be<br>"
             + "submitted to both Last.fm and the given URL.  This allows one<br>"
             + "to perform a backup of the Last.fm data.<br><br>"
-            + "If the parse various artists option is enabled, LastPod will<br>"
-            + "parse the track information when the artist is \"Various<br>"
-            + "Artists\". The parsing consists of spliting the artist and track<br>"
-            + "from the original track String.  (For example, \"Bing<br>"
-            + "Crosby - I'll Be Home for Christmas\" becomes artist=Bing<br>"
-            + "Crosby and track name=I'll Be Home for Christmas.<br><br>"
             + "If parse multi-play tracks is enabled, LastPod will generate<br>"
             + "a new track as needed.  This provides more accurate statistics,<br>"
             + "but invalid play times.";
@@ -254,20 +325,6 @@ public class PreferencesEditor {
         p3.add(backupUrlLabel);
         backupUrlField = new JTextField();
         p3.add(backupUrlField);
-
-        JLabel parseVariousArtistsLabel = new JLabel("Parse \"Various Artists\" Tracks: ");
-        p3.add(parseVariousArtistsLabel);
-        parseVariousArtistsCheck = new JCheckBox();
-        parseVariousArtistsCheck.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (parseVariousArtistsCheck.isSelected()) {
-                        parseVariousArtistsCheck.setText("Enabled");
-                    } else {
-                        parseVariousArtistsCheck.setText("Disabled");
-                    }
-                }
-            });
-        p3.add(parseVariousArtistsCheck);
 
         JLabel parseMultiPlayTracksLabel = new JLabel("Parse Multi-Play Tracks: ");
         p3.add(parseMultiPlayTracksLabel);
@@ -283,7 +340,7 @@ public class PreferencesEditor {
             });
         p3.add(parseMultiPlayTracksCheck);
 
-        SpringUtilities.makeCompactGrid(p3, 3, 2, 5, 2, 3, 4);
+        SpringUtilities.makeCompactGrid(p3, 2, 2, 5, 2, 3, 4);
         p.add(p3);
 
         JPanel p5 = new JPanel();
@@ -371,6 +428,7 @@ public class PreferencesEditor {
         this.dbfield.setText(fPrefs.get("iTunes Path", "<iPod iTunes Database Location>"));
         this.backupUrlField.setText(fPrefs.get("backupUrl", ""));
         this.iTunesfield.setText(fPrefs.get("iT Path", ""));
+        parseVariousArtistsField.setText(fPrefs.get("variousArtistsString", "Various Artists"));
 
         if (fPrefs.get("iTunes Status", "Enabled").equals("Enabled")) {
             this.iTunesStatus.setText("Enabled");
@@ -385,11 +443,13 @@ public class PreferencesEditor {
         }
 
         if (fPrefs.get("parseVariousArtists", "1").equals("1")) {
-            parseVariousArtistsCheck.setText("Enabled");
+            parseVariousArtistsStatus.setText("Enabled");
             parseVariousArtistsCheck.setSelected(true);
+            parseVariousArtistsField.setEditable(true);
         } else {
-            parseVariousArtistsCheck.setText("Disabled");
+            parseVariousArtistsStatus.setText("Disabled");
             parseVariousArtistsCheck.setSelected(false);
+            parseVariousArtistsField.setEditable(false);
         }
 
         if (fPrefs.get("parseMultiPlayTracks", "1").equals("1")) {
@@ -422,6 +482,7 @@ public class PreferencesEditor {
         fPrefs.put("iTunes Path", newItunesPath);
         fPrefs.put("backupUrl", this.backupUrlField.getText());
         fPrefs.put("iT Path", this.iTunesfield.getText());
+        fPrefs.put("variousArtistsString", parseVariousArtistsField.getText());
         fPrefs.put("iTunes Status", this.iTunesStatus.getText());
         fPrefs.put("parseVariousArtists", parseVariousArtists);
         fPrefs.put("parseMultiPlayTracks", parseMultiPlayTracks);

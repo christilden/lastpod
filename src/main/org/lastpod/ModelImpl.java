@@ -82,6 +82,8 @@ public class ModelImpl implements Model {
         String parseVariousArtistsStr = fPrefs.get("parseVariousArtists", "1");
         String parseMultiPlayTracksStr = fPrefs.get("parseMultiPlayTracks", "1");
         boolean parseVariousArtists = parseVariousArtistsStr.equals("1") ? true : false;
+        String variousArtistsString = fPrefs.get("variousArtistsString", "Various Artists");
+        String[] splitVariousArtistStrings = splitVariousArtistsString(variousArtistsString);
         boolean parseMultiPlayTracks = parseMultiPlayTracksStr.equals("1") ? true : false;
 
         if (iTunesPath.equals("default")) {
@@ -90,7 +92,8 @@ public class ModelImpl implements Model {
             return;
         }
 
-        ItunesDbParser itunesDbParser = new ItunesDbParser(iTunesPath, parseVariousArtists);
+        ItunesDbParser itunesDbParser =
+            new ItunesDbParser(iTunesPath, parseVariousArtists, splitVariousArtistStrings);
         PlayCountsParser playCountsParser = new PlayCountsParser(iTunesPath, parseMultiPlayTracks);
         DbReader reader = new DbReader(itunesDbParser, playCountsParser);
 
@@ -202,5 +205,20 @@ public class ModelImpl implements Model {
         }
 
         return filteredRecentPlayed;
+    }
+
+    /**
+     * Splits a ; seperated String of various artist strings.
+     * @param variousArtistsString  The String to split
+     * @return  A split and trimmed String array.
+     */
+    public static String[] splitVariousArtistsString(String variousArtistsString) {
+        String[] splitVariousArtistsString = variousArtistsString.split(";");
+
+        for (int i = 0; i < splitVariousArtistsString.length; i++) {
+            splitVariousArtistsString[i] = splitVariousArtistsString[i].trim();
+        }
+
+        return splitVariousArtistsString;
     }
 }
