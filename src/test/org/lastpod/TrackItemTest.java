@@ -146,6 +146,29 @@ public class TrackItemTest extends TestCase {
     }
 
     /**
+     * Tests a "Various Artists" track that does not have a dash character.
+     */
+    public void testVariousArtistsTrackWithoutDash() {
+        TrackItem trackItem = new TrackItem();
+        trackItem.setTrackid(1);
+        trackItem.setActive(Boolean.TRUE);
+        trackItem.setLength(60);
+        trackItem.setArtist("Various Artists");
+        trackItem.setAlbum("Italo Disco Collection - Vol.");
+        trackItem.setTrack("Raff / Self control");
+        trackItem.setPlaycount(1);
+        trackItem.setLastplayed(1);
+        trackItem.setParseVariousArtists(true);
+        trackItem.setVariousArtistsStrings(VARIOUS_ARTISTS_STRING);
+
+        assertFalse(trackItem.isVariousArtistAlbum(true, VARIOUS_ARTISTS_STRING));
+        assertFalse(trackItem.isVariousArtistAlbum(false, VARIOUS_ARTISTS_STRING));
+        assertEquals("Various Artists", trackItem.getArtist());
+        assertEquals("Italo Disco Collection - Vol.", trackItem.getAlbum());
+        assertEquals("Raff / Self control", trackItem.getTrack());
+    }
+
+    /**
      * Tests a "Various Artists" __Compilations track.
      */
     public void testCompilationTrack() {

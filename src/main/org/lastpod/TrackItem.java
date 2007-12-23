@@ -136,6 +136,12 @@ public class TrackItem implements Comparable {
             return false;
         }
 
+        /* If the track does not contain a "-" character, then do not parse it
+         * as a various artists track. */
+        if (!track.contains("-")) {
+            return false;
+        }
+
         /* In addition to other checks, this makes sure the track is not null,
          * because track will need to be parsed. */
         if ((track != null) && (artist != null)) {
