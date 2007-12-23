@@ -212,7 +212,8 @@ public class MockModel implements Model {
         History.getInstance(".");
 
         Scrobbler scrobbler = new Scrobbler(null, null, null);
-        scrobbler.addHistories(activeRecentPlayed, inactiveRecentPlayed);
+        scrobbler.addInactiveToHistories(inactiveRecentPlayed);
+        scrobbler.addHistories(activeRecentPlayed);
         userInterface.setCompletionStatus(true);
 
         /* Refresh track list. */

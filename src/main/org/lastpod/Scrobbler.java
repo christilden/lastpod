@@ -271,8 +271,6 @@ public class Scrobbler {
 
                 queryString += buildTrackQueryString(track, tracknum);
 
-                /* Unselect the submitted track. */
-                track.setActive(Boolean.FALSE);
                 tracknum++;
             }
 
@@ -308,6 +306,18 @@ public class Scrobbler {
             if ((lines[0].length() >= 2) && !lines[0].substring(0, 2).equals("OK")) {
                 throw new RuntimeException("Unknown error submitting tracks");
             }
+
+            /* The chunk is successfully written to last.fm. Makes sure the
+             * tracks are marked as inactive.  Writes the history file.
+             * This is done after each chunk because if the next chunk fails
+             * the history file should reflect where the failure occurred.
+             */
+            for (int j = 0; j < chunk.getChunkSize(); j++) {
+                TrackItem track = (TrackItem) chunk.getContent().get(j);
+                track.setActive(Boolean.FALSE);
+            }
+
+            addHistories(chunk.getContent());
 
             /* Add 2 to progress.  1 because chunk progress starts at 1, whereas
              * this for-loop is zero indexed.  1 because the handshake is also
@@ -380,14 +390,22 @@ public class Scrobbler {
     /**
      * Creates the histories and writes them to a file.
      * @param activeRecentPlayed  The list of active recently played tracks.
-     * @param inactiveRecentPlayed  The list of inactive recently played tracks.
      */
-    public void addHistories(List activeRecentPlayed, List inactiveRecentPlayed) {
+    public void addHistories(List activeRecentPlayed) {
         for (int i = 0; i < activeRecentPlayed.size(); i++) {
             TrackItem track = (TrackItem) activeRecentPlayed.get(i);
             History.getInstance(null).addhistory(track.getLastplayed());
         }
 
+        History.getInstance(null).write();
+    }
+
+    /**
+     * Adds inactive recent played tracks to the histories file.  This is done
+     * so they will be preserved in the histories.
+     * @param inactiveRecentPlayed  The list of inactive recently played tracks.
+     */
+    public void addInactiveToHistories(List inactiveRecentPlayed) {
         for (int i = 0; i < inactiveRecentPlayed.size(); i++) {
             TrackItem track = (TrackItem) inactiveRecentPlayed.get(i);
 
@@ -395,8 +413,6 @@ public class Scrobbler {
                 History.getInstance(null).addhistory(track.getLastplayed());
             }
         }
-
-        History.getInstance(null).write();
     }
 
     /**

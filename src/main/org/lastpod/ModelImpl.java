@@ -157,9 +157,9 @@ public class ModelImpl implements Model {
 
             scrobbler.setChunkProgress(userInterface);
             scrobbler.setTracksToSubmit(activeRecentPlayed);
+            scrobbler.addInactiveToHistories(inactiveRecentPlayed);
             scrobbler.handshake();
             scrobbler.submitTracks();
-            scrobbler.addHistories(activeRecentPlayed, inactiveRecentPlayed);
 
             /* Refresh track list. */
             recentlyPlayed = new ArrayList();
