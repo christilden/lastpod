@@ -29,8 +29,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -46,8 +47,8 @@ public class History {
     private static final String URL = "history.txt";
     private Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
     private File historyFile = null;
-    private List histories = null;
-    private List newHistories = null;
+    private Set histories = null;
+    private Set newHistories = null;
 
     /**
      * Constructs this object with the history file.
@@ -56,8 +57,8 @@ public class History {
      */
     private History(File historyFile) {
         this.historyFile = historyFile;
-        histories = new ArrayList();
-        newHistories = new ArrayList();
+        histories = new HashSet();
+        newHistories = new HashSet();
     }
 
     /**
@@ -136,8 +137,10 @@ public class History {
             out = new FileWriter(historyFile);
             bufferedWriter = new BufferedWriter(out);
 
-            for (int i = 0; i < newHistories.size(); i++) {
-                bufferedWriter.write((String) newHistories.get(i) + "\n");
+            Iterator i = newHistories.iterator();
+
+            while (i.hasNext()) {
+                bufferedWriter.write((String) i.next() + "\n");
             }
         } catch (IOException e) {
             logger.warning("Error while writting in history file");
