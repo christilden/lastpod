@@ -19,9 +19,14 @@
 package org.lastpod;
 
 import org.lastpod.parser.ItunesDbParser;
+import org.lastpod.parser.ItunesStatsParser;
 import org.lastpod.parser.PlayCountsParser;
+import org.lastpod.parser.TrackItemParser;
 
+import org.lastpod.util.ItunesStatsFilter;
 import org.lastpod.util.MiscUtilities;
+
+import java.io.File;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +99,19 @@ public class ModelImpl implements Model {
 
         ItunesDbParser itunesDbParser =
             new ItunesDbParser(iTunesPath, parseVariousArtists, splitVariousArtistStrings);
-        PlayCountsParser playCountsParser = new PlayCountsParser(iTunesPath, parseMultiPlayTracks);
+
+        /* Defaults to the parser for non-shuffle iPods. */
+        TrackItemParser playCountsParser = new PlayCountsParser(iTunesPath, parseMultiPlayTracks);
+
+        /* Checks for the "iTunesStats" file.  If it exists, switch to the iPod
+         * shuffle parser. */
+        File file = new File(iTunesPath);
+        File[] itunesStatsFiles = file.listFiles(new ItunesStatsFilter());
+
+        if ((itunesStatsFiles != null) && (itunesStatsFiles.length != 0)) {
+            playCountsParser = new ItunesStatsParser(iTunesPath, parseMultiPlayTracks);
+        }
+
         DbReader reader = new DbReader(itunesDbParser, playCountsParser);
 
         try {

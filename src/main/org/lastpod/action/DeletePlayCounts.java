@@ -21,6 +21,8 @@ package org.lastpod.action;
 import org.lastpod.Model;
 import org.lastpod.UI;
 
+import org.lastpod.util.ItunesStatsFilter;
+
 import java.awt.event.ActionEvent;
 
 import java.io.File;
@@ -53,6 +55,13 @@ public class DeletePlayCounts extends AbstractAction {
     private Model model = null;
 
     /**
+     * Stores the file location of the "Play Counts" or "iTunesStats" file.
+     * (For non-shuffle iPods there is a "Play Counts" file, for shuffle
+     * iPods the "iTunesStats" file is used.)
+     */
+    private File playCountsFile;
+
+    /**
      * Constructs this action.
      * @param userInterface  The application's user interface.
      * @param model  The application's model.
@@ -68,6 +77,28 @@ public class DeletePlayCounts extends AbstractAction {
         this.model = model;
         putValue(SHORT_DESCRIPTION, desc);
         putValue(MNEMONIC_KEY, new Integer(mnemonic));
+
+        /* Setup Playcounts file; based on either iPod shuffle or non-shuffle.
+         */
+        Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
+        String iTunesPath = fPrefs.get("iTunes Path", "default");
+
+        if (!iTunesPath.endsWith(File.separator)) {
+            iTunesPath += File.separator;
+        }
+
+        /* Defaults the file for non-shuffle iPods. */
+        playCountsFile = new File(iTunesPath + "Play Counts");
+
+        /* Checks for the "iTunesStats" file.  If it exists, switch to the iPod
+         * shuffle file. */
+        File file = new File(iTunesPath);
+        File[] itunesStatsFiles = file.listFiles(new ItunesStatsFilter());
+
+        if ((itunesStatsFiles != null) && (itunesStatsFiles.length != 0)) {
+            playCountsFile = new File(iTunesPath + "iTunesStats");
+            putValue(SHORT_DESCRIPTION, "Removes the iTunesStats file from the iPod shuffle.");
+        }
     }
 
     /**
@@ -97,7 +128,7 @@ public class DeletePlayCounts extends AbstractAction {
             iTunesPath += File.separator;
         }
 
-        File playCountsFile = new File(iTunesPath + "Play Counts");
+        playCountsFile = new File(iTunesPath + "Play Counts");
 
         boolean succuss = false;
 
