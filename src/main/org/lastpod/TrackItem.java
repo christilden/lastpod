@@ -138,7 +138,7 @@ public class TrackItem implements Comparable {
 
         /* If the track does not contain a "-" character, then do not parse it
          * as a various artists track. */
-        if (!track.contains("-")) {
+        if (track.indexOf("-") <= 0) {
             return false;
         }
 
