@@ -97,6 +97,9 @@ public class ModelImpl implements Model {
             return;
         }
 
+        /* Initialize the history file. */
+        History.getInstance(iTunesPath);
+
         ItunesDbParser itunesDbParser =
             new ItunesDbParser(iTunesPath, parseVariousArtists, splitVariousArtistStrings);
 
