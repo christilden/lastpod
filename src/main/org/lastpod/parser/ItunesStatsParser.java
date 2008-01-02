@@ -147,13 +147,16 @@ public class ItunesStatsParser implements TrackItemParser {
         Calendar calendar = Calendar.getInstance();
 
         for (int i = 0; i < (numentries - 1); i++) {
-            /* Skip unused data. */
-            IoUtils.skipFully(itunesStatsistream, 12);
+            itunesStatsistream.mark(1048576); //save beginning of entry location
 
             itunesStatsistream.read(threeBytes);
 
-            /* Skip 'skippedcount'. */
-            IoUtils.skipFully(itunesStatsistream, 3);
+            int entrylen = IoUtils.littleEndianToBigInt(threeBytes).intValue();
+
+            /* Skip unused data. */
+            IoUtils.skipFully(itunesStatsistream, 9);
+
+            itunesStatsistream.read(threeBytes);
 
             long playcount = IoUtils.littleEndianToBigInt(threeBytes).longValue();
 
@@ -174,6 +177,9 @@ public class ItunesStatsParser implements TrackItemParser {
                     }
                 }
             }
+
+            itunesStatsistream.reset();
+            IoUtils.skipFully(itunesStatsistream, entrylen);
         }
 
         Collections.sort(recentPlays);
