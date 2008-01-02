@@ -34,6 +34,7 @@ public class TrackItem implements Comparable {
     private long playcount;
     private long lastplayed;
     private boolean parseVariousArtists;
+    private String location;
 
     /**
      * A set of strings that will be used to parse various artists.
@@ -52,6 +53,7 @@ public class TrackItem implements Comparable {
         this.track = "";
         this.playcount = 0;
         this.lastplayed = 0;
+        this.location = null;
     }
 
     /**
@@ -69,6 +71,7 @@ public class TrackItem implements Comparable {
         this.setPlaycount(trackItem.getPlaycount());
         this.setLastplayed(trackItem.getLastplayed());
         this.setParseVariousArtists(trackItem.isParseVariousArtists());
+        this.setLocation(trackItem.getLocation());
     }
 
     /**
@@ -277,6 +280,29 @@ public class TrackItem implements Comparable {
         this.variousArtistsStrings = variousArtistsStrings;
     }
 
+    /**
+     * Gets the location of the track.
+     * @return  The location of the track.
+     */
+    public String getLocation() {
+        return location;
+    }
+
+    /**
+     * Sets the location of the track.
+     * @param location  The location of the track.
+     */
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    /**
+     * Compares the given track item to this track item.  The comparision
+     * is based off of lastplayed.
+     * @param trackItem  The given track item to compare.
+     * @return <code>-1</code> if less than or <code>1</code> if greater
+     * than given.
+     */
     public int compareTo(Object trackItem) {
         TrackItem temptrack = (TrackItem) trackItem;
 
@@ -289,6 +315,9 @@ public class TrackItem implements Comparable {
         return 0;
     }
 
+    /**
+     * Converts this <code>TrackItem</code> into a String.
+     */
     public String toString() {
         String tempstring;
 
@@ -299,6 +328,7 @@ public class TrackItem implements Comparable {
         tempstring += ("Track: " + getTrack() + "\n");
         tempstring += ("Play Count: " + playcount + "\n");
         tempstring += ("Last Played: " + new Date(lastplayed * 1000) + "\n");
+        tempstring += ("Location: " + location + "\n");
 
         return tempstring;
     }

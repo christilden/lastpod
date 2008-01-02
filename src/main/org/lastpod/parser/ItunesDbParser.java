@@ -198,7 +198,7 @@ public class ItunesDbParser implements TrackItemParser {
 
         int mhodtype = IoUtils.littleEndianToBigInt(dword).intValue();
 
-        if ((mhodtype == 1) || (mhodtype == 3) || (mhodtype == 4)) {
+        if ((mhodtype == 1) || (mhodtype == 2) || (mhodtype == 3) || (mhodtype == 4)) {
             IoUtils.skipFully(itunesistream, 12);
             itunesistream.read(dword);
 
@@ -214,6 +214,11 @@ public class ItunesDbParser implements TrackItemParser {
             switch (mhodtype) {
             case 1:
                 track.setTrack(stringdata);
+
+                break;
+
+            case 2:
+                track.setLocation(stringdata);
 
                 break;
 
