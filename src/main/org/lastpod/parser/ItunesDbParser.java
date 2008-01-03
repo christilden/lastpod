@@ -28,8 +28,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.math.BigInteger;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Parses the iTunes DB file from the iPod an creates a <code>List</code> of
@@ -44,6 +48,11 @@ public class ItunesDbParser implements TrackItemParser {
     private String iTunesFile;
 
     /**
+     * The location of the iTunesSD file.
+     */
+    private String iTunesSdFile;
+
+    /**
      * Stores a boolean value that will be passed into <code>TrackItem</code>.
      */
     boolean parseVariousArtists;
@@ -52,6 +61,11 @@ public class ItunesDbParser implements TrackItemParser {
      * Stores the strings used to parse various artists.
      */
     String[] variousArtistsStrings;
+
+    /**
+     * Stores <code>true</code> if this iTunesDB is for an iPod shuffle.
+     */
+    boolean isShuffle = false;
 
     /**
      * Default constructor should not be used.
@@ -69,16 +83,19 @@ public class ItunesDbParser implements TrackItemParser {
      * Artists"
      * @param variousArtistsStrings  A String array containing the various artist
      * strings that should be parsed.
+     * @param isShuffle  <code>true</code> if this iTunesDB is for an iPod shuffle.
      */
     public ItunesDbParser(String iTunesPath, boolean parseVariousArtists,
-        String[] variousArtistsStrings) {
+        String[] variousArtistsStrings, boolean isShuffle) {
         if (!iTunesPath.endsWith(File.separator)) {
             iTunesPath += File.separator;
         }
 
         this.iTunesFile = iTunesPath + "iTunesDB";
+        this.iTunesSdFile = iTunesPath + "iTunesSD";
         this.parseVariousArtists = parseVariousArtists;
         this.variousArtistsStrings = variousArtistsStrings;
+        this.isShuffle = isShuffle;
     }
 
     /**
@@ -94,7 +111,13 @@ public class ItunesDbParser implements TrackItemParser {
             itunesFileIn = new FileInputStream(iTunesFile);
             itunesBufferedIn = new BufferedInputStream(itunesFileIn, 65535);
 
-            return parseitunesdb(itunesBufferedIn);
+            List trackList = parseitunesdb(itunesBufferedIn);
+
+            if (!isShuffle) {
+                return trackList;
+            } else {
+                return readItunesSdAndReorderList(trackList);
+            }
         } catch (IOException e) {
             throw new RuntimeException("Error reading iTunes Database");
         } finally {
@@ -236,6 +259,71 @@ public class ItunesDbParser implements TrackItemParser {
 
         itunesistream.reset();
         IoUtils.skipFully(itunesistream, totalsize);
+    }
+
+    /**
+     * Reads the iTunesSD file and uses the ordering in this file to reorder
+     * the track list.
+     * @param trackList  The track list from the iTunesDB
+     * @return  A new <code>java.util.List</code> that is ordered per the
+     * iTunesSD order.
+     * @throws IOException  Thrown if I/O errors occur.
+     */
+    private List readItunesSdAndReorderList(List trackList)
+            throws IOException {
+        InputStream itunesSdFileIn = null;
+        InputStream itunesSdBufferedIn = null;
+
+        try {
+            itunesSdFileIn = new FileInputStream(iTunesSdFile);
+            itunesSdBufferedIn = new BufferedInputStream(itunesSdFileIn, 65535);
+
+            /* Converts the trackList into a Map. */
+            Map trackMap = new HashMap();
+            TrackItem track = null;
+
+            for (int i = 0; i < trackList.size(); i++) {
+                track = (TrackItem) trackList.get(i);
+                trackMap.put(track.getLocation(), track);
+            }
+
+            List orderedTrackList = new ArrayList();
+
+            byte[] threeBytes = new byte[3];
+
+            itunesSdBufferedIn.read(threeBytes);
+
+            int numentries = (new BigInteger(threeBytes)).intValue();
+
+            IoUtils.skipFully(itunesSdBufferedIn, 15); //skip rest of header
+            assert (numentries == trackList.size());
+
+            for (int i = 0; i < (numentries - 1); i++) {
+                itunesSdBufferedIn.mark(1048576); //save beginning of entry location
+
+                itunesSdBufferedIn.read(threeBytes);
+
+                int entrylen = (new BigInteger(threeBytes)).intValue();
+
+                IoUtils.skipFully(itunesSdBufferedIn, 30);
+
+                byte[] data = new byte[522];
+                itunesSdBufferedIn.read(data);
+
+                /* Filename should have : characters instead of / characters. */
+                String filename = new String(data, "UTF-16LE").replace('/', ':').trim();
+
+                orderedTrackList.add(trackMap.get(filename));
+
+                itunesSdBufferedIn.reset();
+                IoUtils.skipFully(itunesSdBufferedIn, entrylen);
+            }
+
+            return orderedTrackList;
+        } finally {
+            IoUtils.cleanup(itunesSdFileIn, null);
+            IoUtils.cleanup(itunesSdBufferedIn, null);
+        }
     }
 
     /**

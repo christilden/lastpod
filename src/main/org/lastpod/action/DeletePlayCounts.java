@@ -21,7 +21,7 @@ package org.lastpod.action;
 import org.lastpod.Model;
 import org.lastpod.UI;
 
-import org.lastpod.util.ItunesStatsFilter;
+import org.lastpod.parser.ItunesStatsParser;
 
 import java.awt.event.ActionEvent;
 
@@ -90,12 +90,8 @@ public class DeletePlayCounts extends AbstractAction {
         /* Defaults the file for non-shuffle iPods. */
         playCountsFile = new File(iTunesPath + "Play Counts");
 
-        /* Checks for the "iTunesStats" file.  If it exists, switch to the iPod
-         * shuffle file. */
-        File file = new File(iTunesPath);
-        File[] itunesStatsFiles = file.listFiles(new ItunesStatsFilter());
-
-        if ((itunesStatsFiles != null) && (itunesStatsFiles.length != 0)) {
+        /* If the iPod is a Shuffle, switch to the shuffle delete logic. */
+        if (ItunesStatsParser.isIpodShuffle(iTunesPath)) {
             playCountsFile = new File(iTunesPath + "iTunesStats");
             putValue(SHORT_DESCRIPTION, "Removes the iTunesStats file from the iPod shuffle.");
         }

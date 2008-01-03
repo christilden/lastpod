@@ -21,6 +21,7 @@ package org.lastpod.parser;
 import org.lastpod.TrackItem;
 
 import org.lastpod.util.IoUtils;
+import org.lastpod.util.ItunesStatsFilter;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -112,7 +113,9 @@ public class ItunesStatsParser implements TrackItemParser {
             playCountsFileIn = new FileInputStream(iTunesStatsFile);
             playCountsBufferedIn = new BufferedInputStream(playCountsFileIn, 65535);
 
-            return parseitunesStats(playCountsBufferedIn);
+            List trackList = parseitunesStats(playCountsBufferedIn);
+
+            return manufactureLastPlayed(trackList);
         } catch (IOException e) {
             String errorMsg =
                 "Error reading iTunesStats Database.\n"
@@ -144,8 +147,6 @@ public class ItunesStatsParser implements TrackItemParser {
 
         IoUtils.skipFully(itunesStatsistream, 3); //skip rest of header
 
-        Calendar calendar = Calendar.getInstance();
-
         for (int i = 0; i < (numentries - 1); i++) {
             itunesStatsistream.mark(1048576); //save beginning of entry location
 
@@ -163,16 +164,13 @@ public class ItunesStatsParser implements TrackItemParser {
             if (playcount > 0) {
                 TrackItem temptrack = (TrackItem) trackList.get(i);
                 temptrack.setPlaycount(playcount);
-                calendar.add(Calendar.SECOND, -(int) temptrack.getLength());
-                temptrack.setLastplayed(calendar.getTimeInMillis() / 1000);
-
                 recentPlays.add(trackList.get(i));
 
                 if (parseMultiPlayTracks && (playcount > 1)) {
                     long numberToManufacture = playcount - 1;
 
                     for (long j = 0; j < numberToManufacture; j++) {
-                        temptrack = manufactureTrack(temptrack, calendar);
+                        temptrack = manufactureTrack(temptrack);
                         recentPlays.add(temptrack);
                     }
                 }
@@ -192,14 +190,43 @@ public class ItunesStatsParser implements TrackItemParser {
      * @param temptrack  The track to manufacture (if needed).
      * @return  A manufactured <code>TrackItem</code>.
      */
-    private TrackItem manufactureTrack(TrackItem temptrack, Calendar calendar) {
+    private TrackItem manufactureTrack(TrackItem temptrack) {
         TrackItem manufacturedTrack = new TrackItem(temptrack);
-        calendar.add(Calendar.SECOND, -(int) manufacturedTrack.getLength());
-        manufacturedTrack.setLastplayed(calendar.getTimeInMillis() / 1000);
-
         manufacturedTrack.setPlaycount(1);
         temptrack.setPlaycount(1);
 
         return manufacturedTrack;
+    }
+
+    /**
+     * Manufactures the last played times for all the track items.
+     * @param trackItems  The list of track items to modify.
+     * @return  The modified list of track items.
+     */
+    private List manufactureLastPlayed(List trackItems) {
+        Calendar calendar = Calendar.getInstance();
+        TrackItem temptrack = null;
+
+        for (int i = trackItems.size() - 1; i >= 0; i--) {
+            temptrack = (TrackItem) trackItems.get(i);
+            calendar.add(Calendar.SECOND, -(int) temptrack.getLength());
+            temptrack.setLastplayed(calendar.getTimeInMillis() / 1000);
+        }
+
+        return trackItems;
+    }
+
+    /**
+     * Utility function to determine if the iTunesPath is that of an iPod shuffle.
+     * @param iTunesPath  The path to the iTunes_Control directory.
+     * @return  <code>true</code> if the iPod is a Shuffle.
+     */
+    public static boolean isIpodShuffle(String iTunesPath) {
+        /* Checks for the "iTunesStats" file.  If it exists, switch to the iPod
+         * shuffle file. */
+        File file = new File(iTunesPath);
+        File[] itunesStatsFiles = file.listFiles(new ItunesStatsFilter());
+
+        return (itunesStatsFiles != null) && (itunesStatsFiles.length != 0);
     }
 }
