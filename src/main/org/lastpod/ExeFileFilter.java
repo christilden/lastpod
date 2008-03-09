@@ -28,6 +28,8 @@ import javax.swing.filechooser.FileFilter;
  * @author Chris Tilden
  */
 public class ExeFileFilter extends FileFilter {
+    public final static boolean OS_IS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
+
     /**
      * Filters a given file and returns <code>true</code> if it should be
      * displayed.
@@ -39,11 +41,16 @@ public class ExeFileFilter extends FileFilter {
             return true;
         }
 
-        if (f.getName().endsWith(".exe")) {
+        /* Only filter .exe extensions for Windows. */
+        if (OS_IS_WINDOWS) {
+            if (f.getName().endsWith(".exe")) {
+                return true;
+            }
+
+            return false;
+        } else {
             return true;
         }
-
-        return false;
     }
 
     /**
@@ -51,6 +58,6 @@ public class ExeFileFilter extends FileFilter {
      * @return  The description.
      */
     public String getDescription() {
-        return "*.exe";
+        return OS_IS_WINDOWS ? "*.exe" : "*";
     }
 }

@@ -95,9 +95,9 @@ public class ExitApplication extends AbstractAction {
             choice = JOptionPane.NO_OPTION;
 
             String message =
-                "No tracks have been submitted to Last.fm.\n"
-                + " Would you still like to launch iTunes?";
-            String title = "Launch iTunes";
+                "No tracks have been submitted to Last.fm. Would you\n"
+                + " still like to launch iPod Manager (such as iTunes)?";
+            String title = "Launch iPod Manager";
             int opt = JOptionPane.YES_NO_OPTION;
             choice = JOptionPane.showConfirmDialog(mainAppFrame, message, title, opt);
         }
@@ -119,15 +119,21 @@ public class ExitApplication extends AbstractAction {
         if (iTunesStatus.equals("Enabled")) {
             String iTunesPath = fPrefs.get("iT Path", "default");
 
-            if (!iTunesPath.endsWith("iTunes.exe")) {
-                iTunesPath += "\\iTunes.exe";
-            }
+            Runtime rt = null;
 
             try {
-                Runtime rt = Runtime.getRuntime();
+                rt = Runtime.getRuntime();
                 rt.exec(iTunesPath);
             } catch (IOException e) {
-                System.out.println(iTunesPath + " not found!  Cannot launch iTunes.");
+                if (!iTunesPath.endsWith("iTunes.exe")) {
+                    iTunesPath += "\\iTunes.exe";
+                }
+
+                try {
+                    rt.exec(iTunesPath);
+                } catch (IOException e2) {
+                    System.out.println(iTunesPath + " not found!  Cannot launch iPod manager.");
+                }
             }
         }
     }

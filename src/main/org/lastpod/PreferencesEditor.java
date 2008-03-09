@@ -167,9 +167,9 @@ public class PreferencesEditor {
         p4.setLayout(new SpringLayout());
         p.add(new JLabel());
 
-        TitledBorder b4 = BorderFactory.createTitledBorder("iTunes:");
+        TitledBorder b4 = BorderFactory.createTitledBorder("iPod Manager (iTunes, gtkpod, etc):");
         p4.setBorder(b4);
-        p4.setToolTipText("Enable if you want to use audioPod with iTunes");
+        p4.setToolTipText("Enable if you want to use lastpod with an iPod Manager.");
 
         JPanel p41 = new JPanel();
         iTCheck = new JCheckBox();
@@ -221,7 +221,7 @@ public class PreferencesEditor {
         p4.add(new JLabel());
         p4.add(new JLabel());
 
-        JLabel exelabel = new JLabel("Location of iTunes.exe:");
+        JLabel exelabel = new JLabel("Location of iPod Manager (such as iTunes.exe):");
         p4.add(exelabel);
         this.iTunesfield = new JTextField();
         this.iTunesfield.setPreferredSize(new Dimension(200, 20));
@@ -544,7 +544,7 @@ public class PreferencesEditor {
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File f = fc.getSelectedFile();
-                iTunesfield.setText(f.getParent());
+                iTunesfield.setText(f.getPath());
             }
         }
     }
