@@ -41,6 +41,11 @@ import java.util.List;
  * @author Chris Tilden
  */
 public class PlayCountsParser implements TrackItemParser {
+	/**
+	 * An offset to prevent spam protection from being triggered by last.fm.
+	 */
+	public static final long SPAM_PROTECTION_OFFSET = 31;
+
     /**
      * The location of the iTunes path.
      */
@@ -204,7 +209,7 @@ public class PlayCountsParser implements TrackItemParser {
     private TrackItem manufactureTrack(TrackItem temptrack) {
         TrackItem manufacturedTrack = new TrackItem(temptrack);
         long lastplayed = temptrack.getLastplayed();
-        long newLastPlayed = lastplayed + temptrack.getLength();
+        long newLastPlayed = lastplayed + temptrack.getLength() - SPAM_PROTECTION_OFFSET;
 
         manufacturedTrack.setLastplayed(newLastPlayed);
         manufacturedTrack.setPlaycount(1);
