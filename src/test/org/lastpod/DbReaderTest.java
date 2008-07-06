@@ -72,8 +72,9 @@ public class DbReaderTest extends TestCase {
         assertEquals("Legend", track.getAlbum());
         assertEquals("No Woman, No Cry (live)", track.getTrack());
         assertEquals(3, track.getPlaycount());
+
         /* Fails for some reason */
-//        assertEquals(1181493524, track.getLastplayed());
+        //        assertEquals(1181493524, track.getLastplayed());
     }
 
     /**
@@ -104,7 +105,7 @@ public class DbReaderTest extends TestCase {
         assertEquals("No Woman, No Cry (live)", track.getTrack());
         assertEquals(1, track.getPlaycount());
         /* Fails for some reason */
-//        assertEquals(1181493524, track.getLastplayed());
+        //        assertEquals(1181414106, track.getLastplayed());
 
         track = (TrackItem) recentlyPlayed.get(15);
         assertEquals(20598, track.getTrackid());
@@ -114,8 +115,7 @@ public class DbReaderTest extends TestCase {
         assertEquals("No Woman, No Cry (live)", track.getTrack());
         assertEquals(1, track.getPlaycount());
         /* Fails for some reason */
-//        assertEquals(1181493951, track.getLastplayed());
-
+        //        assertEquals(1181493524, track.getLastplayed());
         track = (TrackItem) recentlyPlayed.get(16);
         assertEquals(20598, track.getTrackid());
         assertEquals(427, track.getLength());
@@ -124,6 +124,6 @@ public class DbReaderTest extends TestCase {
         assertEquals("No Woman, No Cry (live)", track.getTrack());
         assertEquals(1, track.getPlaycount());
         /* Fails for some reason */
-//        assertEquals(1181494378, track.getLastplayed());
+        //        assertEquals(1181493951, track.getLastplayed());
     }
 }
