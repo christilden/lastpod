@@ -63,6 +63,13 @@ public class MockItunesDbParser implements TrackItemParser {
         trackItem.setAlbum("Legend");
         trackItem.setTrack("No Woman, No Cry (live)");
 
+        trackItem = (TrackItem) trackList.get(2616);
+        trackItem.setTrackid(20599);
+        trackItem.setLength(1000);
+        trackItem.setArtist("Chris Tilden & The Wailers");
+        trackItem.setAlbum("Chris Tilden");
+        trackItem.setTrack("No Woman, No Cry");
+
         return trackList;
     }
 

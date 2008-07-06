@@ -63,9 +63,9 @@ public class DbReaderTest extends TestCase {
             fail(e.toString());
         }
 
-        assertTrue(recentlyPlayed.size() == 15);
+        assertTrue(recentlyPlayed.size() == 16);
 
-        TrackItem track = (TrackItem) recentlyPlayed.get(14);
+        TrackItem track = (TrackItem) recentlyPlayed.get(15);
         assertEquals(20598, track.getTrackid());
         assertEquals(427, track.getLength());
         assertEquals("Bob Marley & The Wailers", track.getArtist());
@@ -95,18 +95,17 @@ public class DbReaderTest extends TestCase {
             fail(e.toString());
         }
 
-        assertTrue(recentlyPlayed.size() == 17);
+        assertTrue(recentlyPlayed.size() == 18);
 
-        TrackItem track = (TrackItem) recentlyPlayed.get(14);
-        assertEquals(20598, track.getTrackid());
-        assertEquals(427, track.getLength());
-        assertEquals("Bob Marley & The Wailers", track.getArtist());
-        assertEquals("Legend", track.getAlbum());
-        assertEquals("No Woman, No Cry (live)", track.getTrack());
+        TrackItem track = (TrackItem) recentlyPlayed.get(13);
+        assertEquals(20599, track.getTrackid());
+        assertEquals(1000, track.getLength());
+        assertEquals("Chris Tilden & The Wailers", track.getArtist());
+        assertEquals("Chris Tilden", track.getAlbum());
+        assertEquals("No Woman, No Cry", track.getTrack());
         assertEquals(1, track.getPlaycount());
         /* Fails for some reason */
         //        assertEquals(1181414106, track.getLastplayed());
-
         track = (TrackItem) recentlyPlayed.get(15);
         assertEquals(20598, track.getTrackid());
         assertEquals(427, track.getLength());
@@ -125,5 +124,15 @@ public class DbReaderTest extends TestCase {
         assertEquals(1, track.getPlaycount());
         /* Fails for some reason */
         //        assertEquals(1181493951, track.getLastplayed());
+        track = (TrackItem) recentlyPlayed.get(17);
+        assertEquals(20598, track.getTrackid());
+        assertEquals(427, track.getLength());
+        assertEquals("Bob Marley & The Wailers", track.getArtist());
+        assertEquals("Legend", track.getAlbum());
+        assertEquals("No Woman, No Cry (live)", track.getTrack());
+        assertEquals(1, track.getPlaycount());
+
+        /* Fails for some reason */
+        //        assertEquals(1181494378, track.getLastplayed());
     }
 }

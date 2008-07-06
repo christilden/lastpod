@@ -154,7 +154,7 @@ public class PlayCountsParser implements TrackItemParser {
 
         IoUtils.skipFully(playcountsistream, 80); //skip rest of header
 
-        for (int i = 0; i < (numentries - 1); i++) {
+        for (int i = 0; i < numentries; i++) {
             playcountsistream.mark(1048576); //save beginning of entry location
 
             playcountsistream.read(dword);
