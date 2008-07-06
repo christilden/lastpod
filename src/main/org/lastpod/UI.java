@@ -112,7 +112,7 @@ public class UI implements ChunkProgress {
      * Constructs the user interface and some icon elements.
      */
     public UI(Model model) {
-        frame = new JFrame("LastPod (v1.01)");
+        frame = new JFrame("LastPod (v1.1)");
 
         submitStatus = new JLabel();
 
