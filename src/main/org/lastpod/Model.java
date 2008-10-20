@@ -43,7 +43,9 @@ public interface Model {
     /**
      * Submits the tracks to Last.fm
      * @param userInterface  The application's user interface.
+     * @param online  submission type:
+     *                  true - online, false - offline (to Last.fm client cache)
      * @return  A status message upon completion.
      */
-    Object submitTracks(UI userInterface);
+    Object submitTracks(UI userInterface, boolean online);
 }

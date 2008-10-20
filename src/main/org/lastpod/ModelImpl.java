@@ -134,9 +134,11 @@ public class ModelImpl implements Model {
     /**
      * Submits the tracks to Last.fm
      * @param userInterface  The application's user interface.
+     * @param online  submission type:
+     *                  true - online, false - offline (to Last.fm client cache)
      * @return  A status message upon completion.
      */
-    public Object submitTracks(UI userInterface) {
+    public Object submitTracks(UI userInterface, boolean online) {
         Logger logger = Logger.getLogger(LastPod.class.getPackage().getName());
         Preferences fPrefs = Preferences.userRoot().node("ws/afterglo/audioPod");
         String username = fPrefs.get("Username", "default");
@@ -166,8 +168,11 @@ public class ModelImpl implements Model {
 
         String backupUrl = fPrefs.get("backupUrl", "");
 
+        String submitCachePath = fPrefs.get("submitCachePath", "");
+
         try {
-            Scrobbler scrobbler = new Scrobbler(username, encryptedPassword, backupUrl);
+            Scrobbler scrobbler =
+                new Scrobbler(username, encryptedPassword, backupUrl, submitCachePath);
 
             List activeRecentPlayed = onlyActiveTrackItems(recentlyPlayed);
             List inactiveRecentPlayed = onlyInactiveTrackItems(recentlyPlayed);
@@ -175,8 +180,13 @@ public class ModelImpl implements Model {
             scrobbler.setChunkProgress(userInterface);
             scrobbler.setTracksToSubmit(activeRecentPlayed);
             scrobbler.addInactiveToHistories(inactiveRecentPlayed);
-            scrobbler.handshake();
-            scrobbler.submitTracks();
+
+            if (online) {
+                scrobbler.handshake();
+                scrobbler.submitTracks();
+            } else {
+                scrobbler.submitTracksToCache();
+            }
 
             /* Refresh track list. */
             recentlyPlayed = new ArrayList();

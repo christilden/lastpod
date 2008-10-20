@@ -138,7 +138,8 @@ public class SubmitTracks extends AbstractAction {
                         busyIconIndex = 0;
                         busyIconTimer.start();
 
-                        return model.submitTracks(userInterface);
+                        // TODO
+                        return model.submitTracks(userInterface, false);
                     }
 
                     public void finished() {

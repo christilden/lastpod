@@ -23,8 +23,17 @@ import org.lastpod.chunk.ChunkUtil;
 
 import org.lastpod.util.IoUtils;
 import org.lastpod.util.MiscUtilities;
+import org.lastpod.util.XmlUtils;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -54,6 +63,12 @@ import java.util.regex.Pattern;
 
 import javax.security.auth.login.FailedLoginException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+
 /**
  * @author muti
  * @version $Id$
@@ -68,6 +83,16 @@ public class Scrobbler {
      * The minimum length (in seconds) of a track that meets Last.fm guidelines.
      */
     private static final int MIN_TRACK_SECONDS = 30;
+
+    /**
+     * Last.fm client cache version.
+     */
+    private static final String CACHE_VERSION = "1.2";
+
+    /**
+     * Last.fm client product name.
+     */
+    private static final String PRODUCT_NAME = "Audioscrobbler";
     private String username;
     private String encryptedPassword;
     private String backupUrl;
@@ -75,6 +100,7 @@ public class Scrobbler {
     private String submitHost;
     private Integer submitPort;
     private String submitUrl;
+    private String submitCachePath;
 
     /**
      * Stores the chunks of tracks to be submitted.
@@ -93,10 +119,12 @@ public class Scrobbler {
     private int interval = 0;
     private Logger logger;
 
-    public Scrobbler(String username, String encryptedPassword, String backupUrl) {
+    public Scrobbler(String username, String encryptedPassword, String backupUrl,
+        String submitCachePath) {
         this.username = username;
         this.encryptedPassword = encryptedPassword;
         this.backupUrl = backupUrl;
+        this.submitCachePath = submitCachePath;
         logger = Logger.getLogger(getClass().getPackage().getName());
     }
 
@@ -325,6 +353,90 @@ public class Scrobbler {
              */
             chunkProgress.updateCurrentChunk(i + 2);
         }
+
+        chunkProgress.setSubmitStatusMessage("Done. You may now sync your iPod.");
+        logger.log(Level.INFO, "Tracks submitted");
+        logger.log(Level.INFO,
+            "You may now sync your iPod with your music management software "
+            + "or delete 'Play Counts' from the iTunes folder!");
+
+        chunkProgress.setCompletionStatus(true);
+    }
+
+    public void submitTracksToCache()
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, MalformedURLException,
+                IOException, FailedLoginException, ParserConfigurationException, SAXException,
+                TransformerConfigurationException, TransformerException, Exception {
+        String statusMessage = "Submitting tracks to cache...";
+        chunkProgress.setSubmitStatusMessage(statusMessage);
+        logger.log(Level.INFO, statusMessage);
+
+        if (trackChunks.size() == 0) {
+            statusMessage = "No tracks to submit";
+            chunkProgress.setSubmitStatusMessage(statusMessage);
+            throw new RuntimeException(statusMessage);
+        }
+
+        File cacheFile = new File(submitCachePath);
+
+        if (cacheFile.createNewFile()) {
+            FileOutputStream fos = new FileOutputStream(cacheFile);
+            String cacheString = "";
+            cacheString += "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
+            cacheString += ("<submissions version=\"" + CACHE_VERSION + "\" product=\""
+            + PRODUCT_NAME + "\">\r\n");
+            cacheString += "</submissions>";
+            fos.write(cacheString.getBytes());
+            fos.close();
+        }
+
+        DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+        Document doc = docBuilder.parse(cacheFile);
+
+        NodeList submissions = doc.getElementsByTagName("submissions");
+
+        Chunk chunk = null;
+
+        for (int i = 0; i < trackChunks.size(); i++) {
+            pauseIfRequired();
+            chunk = (Chunk) trackChunks.get(i);
+
+            int tracknum = 0;
+
+            for (int j = 0; j < chunk.getChunkSize(); j++) {
+                TrackItem track = (TrackItem) chunk.getContent().get(j);
+
+                if (track.getLength() < MIN_TRACK_SECONDS) {
+                    continue;
+                }
+
+                Element item = doc.createElement("item");
+                XmlUtils.addChild(doc, item, "artist", track.getArtist());
+                XmlUtils.addChild(doc, item, "album", track.getAlbum());
+                XmlUtils.addChild(doc, item, "track", track.getTrack());
+                XmlUtils.addChild(doc, item, "duration", Long.toString(track.getLength()));
+                XmlUtils.addChild(doc, item, "timestamp", Long.toString(track.getLastplayed()));
+                XmlUtils.addChild(doc, item, "playcount", "0");
+                XmlUtils.addChild(doc, item, "source", "1");
+                XmlUtils.addChild(doc, item, "userActionFlags", "8");
+                XmlUtils.addChild(doc, item, "playerId", "foo");
+                submissions.item(0).appendChild(item);
+
+                tracknum++;
+            }
+
+            for (int j = 0; j < chunk.getChunkSize(); j++) {
+                TrackItem track = (TrackItem) chunk.getContent().get(j);
+                track.setActive(Boolean.FALSE);
+            }
+
+            addHistories(chunk.getContent());
+
+            chunkProgress.updateCurrentChunk(i + 2);
+        }
+
+        XmlUtils.xmlToFile(doc, submitCachePath);
 
         chunkProgress.setSubmitStatusMessage("Done. You may now sync your iPod.");
         logger.log(Level.INFO, "Tracks submitted");
