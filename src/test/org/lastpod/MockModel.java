@@ -69,6 +69,10 @@ public class MockModel implements Model {
         }
     }
 
+    public Object submitTracks(UI userInterface, boolean online) {
+        return LastPod.NO_PREFS_ERROR;
+    }
+
     /**
      * Parses the play counts and track information from the iPod.
      */
@@ -211,7 +215,7 @@ public class MockModel implements Model {
 
         History.getInstance(".");
 
-        Scrobbler scrobbler = new Scrobbler(null, null, null);
+        Scrobbler scrobbler = new Scrobbler(null, null, null, null);
         scrobbler.addInactiveToHistories(inactiveRecentPlayed);
         scrobbler.addHistories(activeRecentPlayed);
         userInterface.setCompletionStatus(true);
